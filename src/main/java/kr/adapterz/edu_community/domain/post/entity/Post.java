@@ -1,0 +1,52 @@
+package kr.adapterz.edu_community.domain.post.entity;
+
+import jakarta.persistence.*;
+import kr.adapterz.edu_community.domain.user.entity.User;
+import kr.adapterz.edu_community.global.common.entity.BaseEntity;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import static lombok.AccessLevel.PROTECTED;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = PROTECTED)
+public class Post extends BaseEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 100)
+    private String title;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
+    @Column(name = "file_id")
+    private Long attachFileId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
+
+    @Column(nullable = false)
+    private Integer likeCount = 0;
+
+    @Column(nullable = false)
+    private Integer hits = 0;
+
+    @Column(nullable = false)
+    private Integer commentCount = 0;
+
+    // Constructor
+    @Builder
+    public Post(String title, String content, Long attachFileId, User author) {
+        this.title = title;
+        this.content = content;
+        this.attachFileId = attachFileId;
+        this.author = author;
+    }
+
+    // Business Methods
+}
