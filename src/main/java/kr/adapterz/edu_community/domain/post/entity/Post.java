@@ -11,6 +11,7 @@ import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
+@Table(name = "posts")
 @NoArgsConstructor(access = PROTECTED)
 public class Post extends BaseEntity {
 
