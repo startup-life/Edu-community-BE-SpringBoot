@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.comment;
+package kr.adapterz.edu_community.domain.comment.entity;
 
 import jakarta.persistence.*;
 import kr.adapterz.edu_community.domain.post.entity.Post;
