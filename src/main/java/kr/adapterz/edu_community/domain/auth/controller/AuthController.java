@@ -1,12 +1,15 @@
 package kr.adapterz.edu_community.domain.auth.controller;
 
 import jakarta.validation.Valid;
+import kr.adapterz.edu_community.domain.auth.dto.LoginRequest;
+import kr.adapterz.edu_community.domain.auth.dto.LoginResponse;
 import kr.adapterz.edu_community.domain.auth.dto.SignupRequest;
 import kr.adapterz.edu_community.domain.auth.dto.SignupResponse;
 import kr.adapterz.edu_community.domain.auth.service.AuthService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +28,21 @@ public class AuthController {
         return ResponseEntity.ok(
                 ApiResponse.of(200, "register_success", response)
         );
+    }
+
+    // 로그인
+    @PostMapping("/login")
+    public ApiResponse<LoginResponse> login(
+            @Valid @RequestBody LoginRequest loginRequest
+    ) {
+        LoginResponse response = authService.login(loginRequest);
+        return ApiResponse.of(200, "login_success", response);
+    }
+
+    @GetMapping("/test")
+    public ApiResponse<Long> me(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        return ApiResponse.of(200, "success", userId);
     }
 
     // 중복 이메일 검사
