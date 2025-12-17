@@ -75,6 +75,21 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    // 400 - Missing Request Body
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingRequestBody(
+            org.springframework.http.converter.HttpMessageNotReadableException exception) {
+
+        log.warn("Missing request body: {}", exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.of(
+                        HttpStatus.BAD_REQUEST,
+                        "missing_request_body",
+                        null
+                ));
+    }
+
     // 405 Method Not Allowed
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(
