@@ -1,5 +1,6 @@
 package kr.adapterz.edu_community.domain.auth.controller;
 
+import jakarta.validation.Valid;
 import kr.adapterz.edu_community.domain.auth.dto.SignupRequest;
 import kr.adapterz.edu_community.domain.auth.dto.SignupResponse;
 import kr.adapterz.edu_community.domain.auth.service.AuthService;
@@ -18,12 +19,10 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * 회원가입
-     */
+    // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<SignupResponse>> signup(
-            @RequestBody SignupRequest signupRequest
+            @RequestBody @Valid SignupRequest signupRequest
     ) {
         SignupResponse response = authService.signup(signupRequest);
         return ResponseEntity.ok(

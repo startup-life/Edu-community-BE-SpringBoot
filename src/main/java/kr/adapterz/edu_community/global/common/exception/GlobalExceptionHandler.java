@@ -17,7 +17,21 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     /**
-     * @Valid 검증 실패 (400 Bad Request)
+     * 비즈니스 예외 통합 처리
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(
+            BusinessException exception) {
+
+        log.warn("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
+
+        return ResponseEntity
+                .status(exception.getStatus())
+                .body(ApiResponse.of(exception.getStatus(), exception.getMessage(), null));
+    }
+
+    /**
+     * @Valid 검증 실패
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationException(
@@ -34,22 +48,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .badRequest()
-                .body(ApiResponse.of(400, "입력값이 올바르지 않습니다.", errors));
-    }
-
-    /**
-     * IllegalArgumentException (400 Bad Request)
-     * 중복 체크 등에 사용
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(
-            IllegalArgumentException exception) {
-
-        log.warn("IllegalArgumentException: {}", exception.getMessage());
-
-        return ResponseEntity
-                .badRequest()
-                .body(ApiResponse.of(400, exception.getMessage(), null));
+                .body(ApiResponse.of(400, "validation_error", errors));
     }
 
     /**
