@@ -1,6 +1,5 @@
 package kr.adapterz.edu_community.global.common.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -10,7 +9,6 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"status", "message", "data"})
 public class ApiResponse<T> {
 
