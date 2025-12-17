@@ -6,6 +6,7 @@ import kr.adapterz.edu_community.domain.auth.dto.SignupResponse;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 회원가입
@@ -21,7 +23,7 @@ public class AuthService {
     public SignupResponse signup(SignupRequest signupRequest) {
         User user = User.builder()
                 .email(signupRequest.getEmail())
-                .password(signupRequest.getPassword())
+                .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .nickname(signupRequest.getNickname())
                 .build();
 
@@ -29,5 +31,4 @@ public class AuthService {
 
         return SignupResponse.from(savedUser);
     }
-
 }
