@@ -3,6 +3,7 @@ package kr.adapterz.edu_community.domain.auth.controller;
 import kr.adapterz.edu_community.domain.auth.dto.SignupRequest;
 import kr.adapterz.edu_community.domain.auth.dto.SignupResponse;
 import kr.adapterz.edu_community.domain.auth.service.AuthService;
+import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +22,12 @@ public class AuthController {
      * 회원가입
      */
     @PostMapping("/signup")
-    public ResponseEntity<SignupResponse> signup(
+    public ResponseEntity<ApiResponse<SignupResponse>> signup(
             @RequestBody SignupRequest signupRequest
     ) {
         SignupResponse response = authService.signup(signupRequest);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                ApiResponse.of(200, "register_success", response)
+        );
     }
 }
