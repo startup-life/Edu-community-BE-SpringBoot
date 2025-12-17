@@ -23,12 +23,21 @@ public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
 
+    private static final String[] PUBLIC_ENDPOTNTS = {
+            "/api/v1/auth/login",
+            "/api/v1/auth/signup",
+            "/api/v1/auth/email/availability",
+            "/api/v1/auth/nickname/availability",
+            "/api/v1/auth/test"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
+                        .requestMatchers(PUBLIC_ENDPOTNTS).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {

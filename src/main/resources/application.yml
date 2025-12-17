@@ -15,3 +15,8 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+
+jwt:
+  secret: 3W8i2bTUFAf+rQtb6SV01OHnNEpqlntH/wfO770lw/gm3n2onNxHNNtbik6mNux7aNlMD0jsZHzdE2mYZe8vlA== # openssl rand -base64 64
+  access-token-exp-seconds: 3600
+  refresh-token-exp-seconds: 12096000
