@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -58,11 +59,6 @@ public class AuthController {
         );
     }
 
-    @GetMapping("/test")
-    public String testEndpoint() {
-        return "Auth Controller is working!";
-    }
-
     // 액세스 토큰 재발급
     @PostMapping("/token/refresh")
     public ApiResponse<TokenResponse> refreshAccessToken(
@@ -87,6 +83,17 @@ public class AuthController {
                 200,
                 "token_refreshed",
                 result.getToken()
+        );
+    }
+
+    // 로그인 상태 검증
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<AuthStatusResponse>> checkAuthStatus(
+            @AuthenticationPrincipal Long userId
+    ) {
+        AuthStatusResponse response = authService.checkAuthStatus(userId);
+        return ResponseEntity.ok(
+                ApiResponse.of(200, "auth_check_success", response)
         );
     }
 
