@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 
@@ -120,6 +121,7 @@ public class AuthService {
     }
 
     // 로그인 상태 검증
+    @Transactional(readOnly = true)
     public AuthStatusResponse checkAuthStatus(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
@@ -138,6 +140,19 @@ public class AuthService {
                 user.getNickname(),
                 profileImagePath
         );
+    }
+
+    // 비밀번호 변경
+    public void changePassword(
+            Long userId,
+            @RequestBody ChangePasswordRequest changePasswordRequest
+    ) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user_not_found"));
+
+        String newPassword = passwordEncoder.encode(changePasswordRequest.getPassword());
+        user.updatePassword(newPassword);
+        userRepository.save(user);
     }
 
     // 중복 이메일 검사
