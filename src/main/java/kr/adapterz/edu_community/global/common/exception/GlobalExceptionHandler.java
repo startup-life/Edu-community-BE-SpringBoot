@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -16,9 +18,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * 비즈니스 예외 통합 처리
-     */
+    // Custom Business Exceptions
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(
             BusinessException exception) {
@@ -30,9 +30,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.of(exception.getStatus(), exception.getMessage(), null));
     }
 
-    /**
-     * @Valid 검증 실패
-     */
+    // 400 Bad Request - Validation Errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationException(
             MethodArgumentNotValidException exception) {
@@ -51,9 +49,49 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.of(400, "validation_error", errors));
     }
 
-    /**
-     * 500 Internal Server Error
-     */
+    // 400 Bad Request - Missing Path Variable, Query Parameter
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleMissingParam(
+            MissingServletRequestParameterException exception) {
+
+        String parameterName = exception.getParameterName();
+
+        log.warn(
+                "Missing request parameter: name={}, type={}",
+                parameterName,
+                exception.getParameterType()
+        );
+
+        Map<String, String> data = Map.of(
+                parameterName, "required"
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.of(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "missing_request_parameter",
+                        data
+                ));
+    }
+
+    // 405 Method Not Allowed
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex) {
+
+        log.warn("Method not supported: {}", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.of(
+                        HttpStatus.METHOD_NOT_ALLOWED.value(),
+                        "method_not_allowed",
+                        null
+                ));
+    }
+
+    // 500 Internal Server Error - Unexpected Exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
 
@@ -61,6 +99,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.of(500, "서버 내부 오류가 발생했습니다.", null));
+                .body(ApiResponse.of(500, "internal_server_error", null));
     }
 }
