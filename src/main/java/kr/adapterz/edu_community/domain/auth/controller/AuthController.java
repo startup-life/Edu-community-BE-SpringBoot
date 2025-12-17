@@ -6,9 +6,7 @@ import kr.adapterz.edu_community.domain.auth.dto.*;
 import kr.adapterz.edu_community.domain.auth.service.AuthService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +24,7 @@ public class AuthController {
     ) {
         SignupResponse response = authService.signup(signupRequest);
         return ResponseEntity.ok(
-                ApiResponse.of(200, "register_success", response)
+                ApiResponse.of(HttpStatus.OK, "register_success", response)
         );
     }
 
@@ -53,7 +51,7 @@ public class AuthController {
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
         return ApiResponse.of(
-                200,
+                HttpStatus.OK,
                 "login_success",
                 result.getResponse()
         );
@@ -80,7 +78,7 @@ public class AuthController {
         }
 
         return ApiResponse.of(
-                200,
+                HttpStatus.OK,
                 "token_refreshed",
                 result.getToken()
         );
@@ -93,7 +91,7 @@ public class AuthController {
     ) {
         AuthStatusResponse response = authService.checkAuthStatus(userId);
         return ResponseEntity.ok(
-                ApiResponse.of(200, "auth_check_success", response)
+                ApiResponse.of(HttpStatus.OK, "auth_check_success", response)
         );
     }
 
@@ -105,7 +103,7 @@ public class AuthController {
         System.out.println(email);
         authService.validateDuplicateEmail(email);
         return ResponseEntity.ok(
-            ApiResponse.of(200, "available_email", null)
+            ApiResponse.of(HttpStatus.OK, "available_email", null)
         );
     }
 
@@ -116,7 +114,7 @@ public class AuthController {
     ) {
         authService.validateDuplicateNickname(nickname);
         return ResponseEntity.ok(
-            ApiResponse.of(200, "available_nickname", null)
+            ApiResponse.of(HttpStatus.OK, "available_nickname", null)
         );
     }
 }

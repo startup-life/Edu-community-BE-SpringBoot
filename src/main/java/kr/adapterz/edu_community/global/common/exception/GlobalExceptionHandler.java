@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .badRequest()
-                .body(ApiResponse.of(400, "validation_error", errors));
+                .body(ApiResponse.of(HttpStatus.BAD_REQUEST, "validation_error", errors));
     }
 
     // 400 Bad Request - Missing Path Variable, Query Parameter
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.of(
-                        HttpStatus.BAD_REQUEST.value(),
+                        HttpStatus.BAD_REQUEST,
                         "missing_request_parameter",
                         data
                 ));
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ApiResponse.of(
-                        HttpStatus.METHOD_NOT_ALLOWED.value(),
+                        HttpStatus.METHOD_NOT_ALLOWED,
                         "method_not_allowed",
                         null
                 ));
@@ -99,6 +99,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.of(500, "internal_server_error", null));
+                .body(ApiResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "internal_server_error", null));
     }
 }

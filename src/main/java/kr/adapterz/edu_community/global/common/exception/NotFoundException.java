@@ -1,7 +1,9 @@
 package kr.adapterz.edu_community.global.common.exception;
 
+import org.springframework.http.HttpStatus;
+
 public class NotFoundException extends BusinessException {
     public NotFoundException(String message) {
-        super(message, 404);
+        super(message, HttpStatus.NOT_FOUND);
     }
 }

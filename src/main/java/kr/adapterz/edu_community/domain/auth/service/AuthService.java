@@ -120,6 +120,7 @@ public class AuthService {
     }
 
     // 로그인 상태 검증
+    @Transactional(readOnly = true)
     public AuthStatusResponse checkAuthStatus(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
@@ -139,6 +140,7 @@ public class AuthService {
                 profileImagePath
         );
     }
+
 
     // 중복 이메일 검사
     @Transactional(readOnly = true)
