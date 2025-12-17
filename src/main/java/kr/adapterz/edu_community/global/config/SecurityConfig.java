@@ -1,6 +1,7 @@
 package kr.adapterz.edu_community.global.config;
 
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
+import kr.adapterz.edu_community.global.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.PrintWriter;
@@ -22,13 +24,14 @@ import java.io.PrintWriter;
 public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    private static final String[] PUBLIC_ENDPOTNTS = {
+    private static final String[] PUBLIC_ENDPOINTS = {
             "/api/v1/auth/login",
             "/api/v1/auth/signup",
+            "/api/v1/auth/token/refresh",
             "/api/v1/auth/email/availability",
-            "/api/v1/auth/nickname/availability",
-            "/api/v1/auth/test"
+            "/api/v1/auth/nickname/availability"
     };
 
     @Bean
@@ -36,7 +39,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_ENDPOTNTS).permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
@@ -70,6 +73,10 @@ public class SecurityConfig {
                             writer.write(objectMapper.writeValueAsString(apiResponse));
                             writer.flush();
                         })
+                )
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 );
         return http.build();
     }

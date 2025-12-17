@@ -1,10 +1,9 @@
 package kr.adapterz.edu_community.domain.auth.service;
 
 import jakarta.transaction.Transactional;
-import kr.adapterz.edu_community.domain.auth.dto.LoginRequest;
-import kr.adapterz.edu_community.domain.auth.dto.LoginResponse;
-import kr.adapterz.edu_community.domain.auth.dto.SignupRequest;
-import kr.adapterz.edu_community.domain.auth.dto.SignupResponse;
+import kr.adapterz.edu_community.domain.auth.dto.*;
+import kr.adapterz.edu_community.domain.auth.entity.RefreshToken;
+import kr.adapterz.edu_community.domain.auth.repository.RefreshTokenRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import kr.adapterz.edu_community.global.common.exception.AuthorizedException;
@@ -14,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // 회원가입
     public SignupResponse signup(SignupRequest signupRequest) {
@@ -40,7 +42,7 @@ public class AuthService {
     }
 
     // 로그인
-    public LoginResponse login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
@@ -60,10 +62,56 @@ public class AuthService {
                 user.getNickname()
         );
 
-        return LoginResponse.of(
-                user,
-                accessToken,
-                jwtProvider.getAccessTokenValidityInMilliseconds()
+        String refreshToken = jwtProvider.createRefreshToken(user.getId());
+        refreshTokenRepository.deleteByUserId(user.getId());
+        refreshTokenRepository.save(
+                new RefreshToken(
+                        refreshToken,
+                        user.getId(),
+                        LocalDateTime.now().plusDays(14)
+                )
+        );
+
+        return new LoginResult(
+                LoginResponse.of(user, accessToken, jwtProvider.getAccessTokenValidityInMilliseconds()),
+                refreshToken
+        );
+    }
+
+    // 액세스 토큰 재발급
+    public TokenResult refreshAccessToken(String refreshToken) {
+
+        RefreshToken saved = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new AuthorizedException("invalid_refresh_token"));
+
+        if (saved.isExpired()) {
+            refreshTokenRepository.delete(saved);
+            throw new AuthorizedException("refresh_token_expired");
+        }
+
+        User user = userRepository.findById(saved.getUserId())
+                .orElseThrow(() -> new AuthorizedException("invalid_refresh_token"));
+
+        String newAccessToken = jwtProvider.createAccessToken(
+                user.getId(),
+                user.getEmail(),
+                user.getNickname()
+        );
+
+        // Refresh Token 회전 (Rotation)
+        String newRefreshToken = jwtProvider.createRefreshToken(user.getId());
+        refreshTokenRepository.delete(saved);
+        refreshTokenRepository.save(
+            new RefreshToken(
+                newRefreshToken,
+                user.getId(),
+                LocalDateTime.now().plusDays(14)
+            )
+        );
+
+        return new TokenResult(
+                new TokenResponse(newAccessToken, 3600),
+                newRefreshToken
         );
     }
 
