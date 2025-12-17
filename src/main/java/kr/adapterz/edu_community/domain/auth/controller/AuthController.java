@@ -95,10 +95,22 @@ public class AuthController {
         );
     }
 
+    // 비밀번호 변경
+    @PatchMapping("/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody ChangePasswordRequest changePasswordRequest
+    ) {
+        authService.changePassword(userId, changePasswordRequest);
+        return ResponseEntity.ok(
+                ApiResponse.of(HttpStatus.OK, "password_change_success", null)
+        );
+    }
+
     // 중복 이메일 검사
     @GetMapping("/email/availability")
     public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(
-        @RequestParam(value="email") String email
+        @Valid @RequestParam(value="email") String email
     ) {
         System.out.println(email);
         authService.validateDuplicateEmail(email);
@@ -110,7 +122,7 @@ public class AuthController {
     // 중복 닉네임 검사
     @GetMapping("/nickname/availability")
     public ResponseEntity<ApiResponse<Void>> checkNicknameAvailability(
-        @RequestParam(value="nickname") String nickname
+        @Valid @RequestParam(value="nickname") String nickname
     ) {
         authService.validateDuplicateNickname(nickname);
         return ResponseEntity.ok(
