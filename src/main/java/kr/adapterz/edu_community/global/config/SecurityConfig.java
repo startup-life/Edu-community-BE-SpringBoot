@@ -31,7 +31,9 @@ public class SecurityConfig {
             "/api/v1/auth/signup",
             "/api/v1/auth/token/refresh",
             "/api/v1/auth/email/availability",
-            "/api/v1/auth/nickname/availability"
+            "/api/v1/auth/nickname/availability",
+            "/api/v1/users/me/profile-image",
+            "/public/**"
     };
 
     @Bean
