@@ -4,12 +4,15 @@ import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +21,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Custom Business Exceptions
+    // Business Exceptions
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusinessException(
             BusinessException exception) {
@@ -49,91 +52,34 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.of(HttpStatus.BAD_REQUEST, "validation_error", errors));
     }
 
-    // 400 Bad Request - Missing Path Variable, Query Parameter
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleMissingParam(
-            MissingServletRequestParameterException exception) {
+    // Integration Exception
+    @ExceptionHandler({
+            MissingServletRequestParameterException.class,
+            MissingServletRequestPartException.class,
+            HttpMessageNotReadableException.class,
+            HttpRequestMethodNotSupportedException.class,
+            MultipartException.class
+            // add more as needed (4xx exceptions)
+    })
+    public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception exception) {
+        log.warn("Bad request: {}", exception.getMessage());
 
-        String parameterName = exception.getParameterName();
+        String errorMessage = switch (exception) {
+            case MissingServletRequestParameterException e -> "missing_parameter";
+            case MissingServletRequestPartException e -> "missing_part";
+            case HttpMessageNotReadableException e -> "invalid_request_body";
+            case HttpRequestMethodNotSupportedException e -> "method_not_allowed";
+            case MultipartException e -> "invalid_multipart";
+            default -> "bad_request";
+        };
 
-        log.warn(
-                "Missing request parameter: name={}, type={}",
-                parameterName,
-                exception.getParameterType()
-        );
-
-        Map<String, String> data = Map.of(
-                parameterName, "required"
-        );
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.of(
-                        HttpStatus.BAD_REQUEST,
-                        "missing_request_parameter",
-                        data
-                ));
-    }
-
-    // 400 - Missing Request Body
-    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMissingRequestBody(
-            org.springframework.http.converter.HttpMessageNotReadableException exception) {
-
-        log.warn("Missing request body: {}", exception.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.of(
-                        HttpStatus.BAD_REQUEST,
-                        "missing_request_body",
-                        null
-                ));
-    }
-
-    // 400 - Multipart Exception
-    @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMultipartException(
-            org.springframework.web.multipart.MultipartException exception) {
-
-        log.warn("Multipart error: {}", exception.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.of(
-                        HttpStatus.BAD_REQUEST,
-                        "invalid_multipart_request",
-                        null
-                ));
-    }
-
-    // 400 - MissingServletRequestPartException
-    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestPartException(
-            org.springframework.web.multipart.support.MissingServletRequestPartException exception) {
-
-        log.warn("Missing request part: {}", exception.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.of(
-                        HttpStatus.BAD_REQUEST,
-                        "missing_request_part",
-                        null
-                ));
-    }
-
-    // 405 Method Not Allowed
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(
-            HttpRequestMethodNotSupportedException ex) {
-
-        log.warn("Method not supported: {}", ex.getMessage());
+        HttpStatus status = exception instanceof HttpRequestMethodNotSupportedException
+                ? HttpStatus.METHOD_NOT_ALLOWED
+                : HttpStatus.BAD_REQUEST;
 
         return ResponseEntity
-                .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.of(
-                        HttpStatus.METHOD_NOT_ALLOWED,
-                        "method_not_allowed",
-                        null
-                ));
+                .status(status)
+                .body(ApiResponse.of(status, errorMessage, null));
     }
 
     // 500 Internal Server Error - Unexpected Exceptions
