@@ -39,7 +39,6 @@ public class AuthController {
         // 로그인 처리
         LoginResult result = authService.login(loginRequest);
 
-        // Refresh Token을 HttpOnly 쿠키로 설정
         ResponseCookie refreshCookie = ResponseCookie
                 .from("refreshToken", result.getRefreshToken())
                 .httpOnly(true)
@@ -61,6 +60,7 @@ public class AuthController {
 
     // 액세스 토큰 재발급
     @PostMapping("/token/refresh")
+        // Refresh Token을 HttpOnly 쿠키로 설정
     public ApiResponse<TokenResponse> refreshAccessToken(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
             HttpServletResponse httpResponse
