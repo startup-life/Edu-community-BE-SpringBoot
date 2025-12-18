@@ -41,4 +41,7 @@ public class User extends BaseEntity {
         this.nickname = nickname;
     }
     public void updatePassword(String password) { this.password = password; }
+    public void updateProfileImageId(Long profileImageId) {
+        this.profileImageId = profileImageId;
+    }
 }

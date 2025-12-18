@@ -2,6 +2,7 @@ package kr.adapterz.edu_community.domain.user.service;
 
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
+import kr.adapterz.edu_community.domain.user.dto.UpdateUserRequest;
 import kr.adapterz.edu_community.domain.user.dto.UserInfoResponse;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
@@ -18,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
 
+    // 유저 정보 가져오기
     @Transactional(readOnly = true)
     public UserInfoResponse getUserInfo(Long userId) {
         User user = userRepository.findById(userId)
@@ -35,5 +37,20 @@ public class UserService {
                 user,
                 profileImagePath
         );
+    }
+
+    public void updateUser(Long userId, UpdateUserRequest updateUserRequest) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user_not_found"));
+
+        user.updateNickname(updateUserRequest.getNickname());
+
+        if (updateUserRequest.getProfileImagePath() != null) {
+            File newProfileImage = fileRepository.findByFilePath(updateUserRequest.getProfileImagePath())
+                    .orElseThrow(() -> new NotFoundException("file_not_found"));
+            user.updateProfileImageId(newProfileImage.getId());
+        }
+
+        userRepository.save(user);
     }
 }
