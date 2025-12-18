@@ -3,7 +3,6 @@ package kr.adapterz.edu_community.domain.post.entity;
 import jakarta.persistence.*;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.global.common.entity.BaseEntity;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -41,7 +40,6 @@ public class Post extends BaseEntity {
     private Integer commentCount = 0;
 
     // Constructor
-    @Builder
     public Post(String title, String content, Long attachFileId, User author) {
         this.title = title;
         this.content = content;

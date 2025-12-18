@@ -35,11 +35,13 @@ public class AuthService {
         validateDuplicateEmail(signupRequest.getEmail());
         validateDuplicateNickname(signupRequest.getNickname());
 
-        User user = User.builder()
-                .email(signupRequest.getEmail())
-                .password(passwordEncoder.encode(signupRequest.getPassword()))
-                .nickname(signupRequest.getNickname())
-                .build();
+
+        User user = new User(
+                signupRequest.getEmail(),
+                passwordEncoder.encode(signupRequest.getPassword()),
+                signupRequest.getNickname(),
+                null
+        );
 
         User savedUser = userRepository.save(user);
 

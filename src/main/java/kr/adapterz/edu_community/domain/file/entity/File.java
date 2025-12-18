@@ -2,7 +2,6 @@ package kr.adapterz.edu_community.domain.file.entity;
 
 import jakarta.persistence.*;
 import kr.adapterz.edu_community.global.common.entity.BaseEntity;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,7 +27,6 @@ public class File extends BaseEntity {
     private Long uploaderId;  // 업로더 추적용 (nullable)
 
     // Constructor
-    @Builder
     public File(String filePath, FileCategory fileCategory, Long uploaderId) {
         this.filePath = filePath;
         this.fileCategory = fileCategory;

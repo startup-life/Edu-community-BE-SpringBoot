@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.global.common.entity.BaseEntity;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,7 +30,6 @@ public class Comment extends BaseEntity {
     private Post post;
 
     // Constructor
-    @Builder
     public Comment(Long id, String content, User author, Post post) {
         this.id = id;
         this.content = content;

@@ -19,12 +19,14 @@ public class AuthController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<SignupResponse>> signup(
-            @RequestBody @Valid SignupRequest signupRequest
+    public ApiResponse<SignupResponse> signup(
+            @Valid @RequestBody SignupRequest signupRequest
     ) {
         SignupResponse response = authService.signup(signupRequest);
-        return ResponseEntity.ok(
-                ApiResponse.of(HttpStatus.OK, "register_success", response)
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "register_success",
+                response
         );
     }
 
@@ -37,7 +39,6 @@ public class AuthController {
         // 로그인 처리
         LoginResult result = authService.login(loginRequest);
 
-        // Refresh Token을 HttpOnly 쿠키로 설정
         ResponseCookie refreshCookie = ResponseCookie
                 .from("refreshToken", result.getRefreshToken())
                 .httpOnly(true)
@@ -59,6 +60,7 @@ public class AuthController {
 
     // 액세스 토큰 재발급
     @PostMapping("/token/refresh")
+        // Refresh Token을 HttpOnly 쿠키로 설정
     public ApiResponse<TokenResponse> refreshAccessToken(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
             HttpServletResponse httpResponse
@@ -86,47 +88,57 @@ public class AuthController {
 
     // 로그인 상태 검증
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<AuthStatusResponse>> checkAuthStatus(
+    public ApiResponse<AuthStatusResponse> checkAuthStatus(
             @AuthenticationPrincipal Long userId
     ) {
         AuthStatusResponse response = authService.checkAuthStatus(userId);
-        return ResponseEntity.ok(
-                ApiResponse.of(HttpStatus.OK, "auth_check_success", response)
+
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "auth_check_success",
+                response
         );
     }
 
     // 비밀번호 변경
     @PatchMapping("/password")
-    public ResponseEntity<ApiResponse<Void>> changePassword(
+    public ApiResponse<Void> changePassword(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody ChangePasswordRequest changePasswordRequest
     ) {
         authService.changePassword(userId, changePasswordRequest);
-        return ResponseEntity.ok(
-                ApiResponse.of(HttpStatus.OK, "password_change_success", null)
+
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "password_change_success",
+                null
         );
     }
 
     // 중복 이메일 검사
     @GetMapping("/email/availability")
-    public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(
-        @Valid @RequestParam(value="email") String email
+    public ApiResponse<Void> checkEmailAvailability(
+        @RequestParam(value="email") String email
     ) {
         System.out.println(email);
         authService.validateDuplicateEmail(email);
-        return ResponseEntity.ok(
-            ApiResponse.of(HttpStatus.OK, "available_email", null)
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "available_email",
+                null
         );
     }
 
     // 중복 닉네임 검사
     @GetMapping("/nickname/availability")
-    public ResponseEntity<ApiResponse<Void>> checkNicknameAvailability(
-        @Valid @RequestParam(value="nickname") String nickname
+    public ApiResponse<Void> checkNicknameAvailability(
+        @RequestParam(value="nickname") String nickname
     ) {
         authService.validateDuplicateNickname(nickname);
-        return ResponseEntity.ok(
-            ApiResponse.of(HttpStatus.OK, "available_nickname", null)
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "available_nickname",
+                null
         );
     }
 }
