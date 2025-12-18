@@ -3,7 +3,6 @@ package kr.adapterz.edu_community.domain.user.entity;
 import jakarta.persistence.*;
 import kr.adapterz.edu_community.global.common.entity.BaseEntity;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,7 +29,6 @@ public class User extends BaseEntity {
     private Long profileImageId;
 
     // Constructor
-    @Builder
     public User(String email, String password, String nickname, Long profileImageId) {
         this.email = email;
         this.password = password;
