@@ -1,0 +1,39 @@
+package kr.adapterz.edu_community.domain.user.service;
+
+import kr.adapterz.edu_community.domain.file.entity.File;
+import kr.adapterz.edu_community.domain.file.repository.FileRepository;
+import kr.adapterz.edu_community.domain.user.dto.UserInfoResponse;
+import kr.adapterz.edu_community.domain.user.entity.User;
+import kr.adapterz.edu_community.domain.user.repository.UserRepository;
+import kr.adapterz.edu_community.global.common.exception.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final FileRepository fileRepository;
+
+    @Transactional(readOnly = true)
+    public UserInfoResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user_not_found"));
+
+        String profileImagePath = "/public/images/profile/default.jpg";
+
+        if (user.getProfileImageId() != null) {
+            profileImagePath = fileRepository.findById(user.getProfileImageId())
+                    .map(File::getFilePath)
+                    .orElse(profileImagePath);
+        }
+
+        return UserInfoResponse.of(
+                user,
+                profileImagePath
+        );
+    }
+}
