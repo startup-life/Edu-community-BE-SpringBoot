@@ -90,6 +90,36 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    // 400 - Multipart Exception
+    @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMultipartException(
+            org.springframework.web.multipart.MultipartException exception) {
+
+        log.warn("Multipart error: {}", exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.of(
+                        HttpStatus.BAD_REQUEST,
+                        "invalid_multipart_request",
+                        null
+                ));
+    }
+
+    // 400 - MissingServletRequestPartException
+    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestPartException(
+            org.springframework.web.multipart.support.MissingServletRequestPartException exception) {
+
+        log.warn("Missing request part: {}", exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.of(
+                        HttpStatus.BAD_REQUEST,
+                        "missing_request_part",
+                        null
+                ));
+    }
+
     // 405 Method Not Allowed
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(
