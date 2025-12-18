@@ -20,7 +20,7 @@ public class AuthController {
     // 회원가입
     @PostMapping("/signup")
     public ApiResponse<SignupResponse> signup(
-            @RequestBody @Valid SignupRequest signupRequest
+            @Valid @RequestBody SignupRequest signupRequest
     ) {
         SignupResponse response = authService.signup(signupRequest);
         return ApiResponse.of(
@@ -118,7 +118,7 @@ public class AuthController {
     // 중복 이메일 검사
     @GetMapping("/email/availability")
     public ApiResponse<Void> checkEmailAvailability(
-        @Valid @RequestParam(value="email") String email
+        @RequestParam(value="email") String email
     ) {
         System.out.println(email);
         authService.validateDuplicateEmail(email);
@@ -132,7 +132,7 @@ public class AuthController {
     // 중복 닉네임 검사
     @GetMapping("/nickname/availability")
     public ApiResponse<Void> checkNicknameAvailability(
-        @Valid @RequestParam(value="nickname") String nickname
+        @RequestParam(value="nickname") String nickname
     ) {
         authService.validateDuplicateNickname(nickname);
         return ApiResponse.of(
