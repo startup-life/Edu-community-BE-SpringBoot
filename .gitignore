@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Static files
+/uploads/profile/*
+!/uploads/profile/.gitkeep
