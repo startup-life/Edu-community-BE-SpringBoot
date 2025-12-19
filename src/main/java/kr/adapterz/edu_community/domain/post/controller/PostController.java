@@ -1,6 +1,6 @@
 package kr.adapterz.edu_community.domain.post.controller;
 
-import kr.adapterz.edu_community.domain.post.dto.resposne.GetPostsResponse;
+import kr.adapterz.edu_community.domain.post.dto.resposne.PostsResponse;
 import kr.adapterz.edu_community.domain.post.service.PostService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +18,13 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping()
-    public ApiResponse<GetPostsResponse> getPosts(
+    public ApiResponse<PostsResponse> getPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String direction
     ) {
-        GetPostsResponse response = postService.getPosts(page, size, sortBy, direction);
+        PostsResponse response = postService.getPosts(page, size, sortBy, direction);
 
         return ApiResponse.of(
                 HttpStatus.OK,

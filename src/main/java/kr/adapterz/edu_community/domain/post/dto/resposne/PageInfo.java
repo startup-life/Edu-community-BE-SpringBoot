@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.post.dto.internal;
+package kr.adapterz.edu_community.domain.post.dto.resposne;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
