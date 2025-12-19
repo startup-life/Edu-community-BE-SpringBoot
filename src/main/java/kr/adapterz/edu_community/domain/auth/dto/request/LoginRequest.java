@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.auth.dto;
+package kr.adapterz.edu_community.domain.auth.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SignupRequest {
+public class LoginRequest {
 
     @NotBlank(message = "required")
     @Email
@@ -17,7 +17,4 @@ public class SignupRequest {
 
     @NotBlank(message = "required")
     private String password;
-
-    @NotBlank(message = "required")
-    private String nickname;
 }

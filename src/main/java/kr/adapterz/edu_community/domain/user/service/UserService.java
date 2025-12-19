@@ -2,8 +2,8 @@ package kr.adapterz.edu_community.domain.user.service;
 
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
-import kr.adapterz.edu_community.domain.user.dto.UpdateUserRequest;
-import kr.adapterz.edu_community.domain.user.dto.UserInfoResponse;
+import kr.adapterz.edu_community.domain.user.dto.request.UpdateUserRequest;
+import kr.adapterz.edu_community.domain.user.dto.response.UserInfoResponse;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import kr.adapterz.edu_community.global.common.exception.NotFoundException;
@@ -40,19 +40,19 @@ public class UserService {
     }
 
     public void updateUser(Long userId, UpdateUserRequest updateUserRequest) {
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("user_not_found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user_not_found"));
 
-    user.updateNickname(updateUserRequest.getNickname());
+        user.updateNickname(updateUserRequest.getNickname());
 
-    if (updateUserRequest.getProfileImagePath() != null) {
-        File newProfileImage = fileRepository.findByFilePath(updateUserRequest.getProfileImagePath())
-                .orElseThrow(() -> new NotFoundException("file_not_found"));
-        user.updateProfileImageId(newProfileImage.getId());
+        if (updateUserRequest.getProfileImagePath() != null) {
+            File newProfileImage = fileRepository.findByFilePath(updateUserRequest.getProfileImagePath())
+                    .orElseThrow(() -> new NotFoundException("file_not_found"));
+            user.updateProfileImageId(newProfileImage.getId());
+        }
+
+        userRepository.save(user);
     }
-
-    userRepository.save(user);
-}
 
     public void withdrawUser(Long userId) {
     User user = userRepository.findById(userId)

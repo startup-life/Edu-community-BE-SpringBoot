@@ -40,6 +40,12 @@ public class Post extends BaseEntity {
     private Integer commentCount = 0;
 
     // Constructor
+    public Post(String title, String content, User author) {
+        this.title = title;
+        this.content = content;
+        this.author = author;
+    }
+
     public Post(String title, String content, Long attachFileId, User author) {
         this.title = title;
         this.content = content;

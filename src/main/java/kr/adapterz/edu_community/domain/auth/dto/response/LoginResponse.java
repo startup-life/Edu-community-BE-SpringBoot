@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.auth.dto;
+package kr.adapterz.edu_community.domain.auth.dto.response;
 
 import kr.adapterz.edu_community.domain.user.entity.User;
 import lombok.AllArgsConstructor;
@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class LoginResponse {
 
-    private LoginUserResponse user;
-    private TokenResponse token;
+    private UserInfo user;
+    private TokenInfo token;
 
     public static LoginResponse of(
             User user,
@@ -17,8 +17,8 @@ public class LoginResponse {
             long expiresIn
     ) {
         return new LoginResponse(
-                LoginUserResponse.from(user),
-                new TokenResponse(accessToken, expiresIn)
+                UserInfo.from(user),
+                new TokenInfo(accessToken, expiresIn)
         );
     }
 }
