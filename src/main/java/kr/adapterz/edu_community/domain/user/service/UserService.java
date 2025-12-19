@@ -40,19 +40,19 @@ public class UserService {
     }
 
     public void updateUser(Long userId, UpdateUserRequest updateUserRequest) {
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("user_not_found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user_not_found"));
 
-    user.updateNickname(updateUserRequest.getNickname());
+        user.updateNickname(updateUserRequest.getNickname());
 
-    if (updateUserRequest.getProfileImagePath() != null) {
-        File newProfileImage = fileRepository.findByFilePath(updateUserRequest.getProfileImagePath())
-                .orElseThrow(() -> new NotFoundException("file_not_found"));
-        user.updateProfileImageId(newProfileImage.getId());
+        if (updateUserRequest.getProfileImagePath() != null) {
+            File newProfileImage = fileRepository.findByFilePath(updateUserRequest.getProfileImagePath())
+                    .orElseThrow(() -> new NotFoundException("file_not_found"));
+            user.updateProfileImageId(newProfileImage.getId());
+        }
+
+        userRepository.save(user);
     }
-
-    userRepository.save(user);
-}
 
     public void withdrawUser(Long userId) {
     User user = userRepository.findById(userId)
