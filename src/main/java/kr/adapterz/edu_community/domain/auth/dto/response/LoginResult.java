@@ -1,6 +1,5 @@
-package kr.adapterz.edu_community.domain.auth.dto.internal;
+package kr.adapterz.edu_community.domain.auth.dto.response;
 
-import kr.adapterz.edu_community.domain.auth.dto.response.LoginResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.auth.dto.response;
+package kr.adapterz.edu_community.domain.auth.dto.request;
 
 import kr.adapterz.edu_community.domain.user.entity.User;
 import lombok.Builder;
