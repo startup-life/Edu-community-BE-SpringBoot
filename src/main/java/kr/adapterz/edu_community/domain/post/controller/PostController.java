@@ -1,9 +1,10 @@
 package kr.adapterz.edu_community.domain.post.controller;
 
-import kr.adapterz.edu_community.domain.post.entity.Post;
+import kr.adapterz.edu_community.domain.post.dto.resposne.GetPostsResponse;
 import kr.adapterz.edu_community.domain.post.service.PostService;
+import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,12 +18,18 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping()
-    public Page<Post> getPosts(
+    public ApiResponse<GetPostsResponse> getPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String direction
     ) {
-        return postService.getPosts(page, size, sortBy, direction);
+        GetPostsResponse response = postService.getPosts(page, size, sortBy, direction);
+
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "get_posts_success",
+                response
+        );
     }
 }
