@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.post.dto.resposne;
+package kr.adapterz.edu_community.domain.post.dto.internal;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 
 @Getter
 @AllArgsConstructor
-public class PageResult {
+public class PageInfo {
 
     private int page;
     private int size;
@@ -14,8 +14,8 @@ public class PageResult {
     private long totalPages;
     private boolean hasNext;
 
-    public static PageResult from(Page<?> page) {
-        return new PageResult(
+    public static PageInfo from(Page<?> page) {
+        return new PageInfo(
                 page.getNumber(),
                 page.getSize(),
                 page.getTotalElements(),

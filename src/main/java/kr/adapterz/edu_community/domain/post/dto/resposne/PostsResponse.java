@@ -8,9 +8,9 @@ import lombok.Getter;
 public class GetPostsResponse {
 
     private PostsResult posts;
-    private PageResult page;
+    private PageInfo page;
 
-    public static GetPostsResponse of(PostsResult posts, PageResult page) {
+    public static GetPostsResponse of(PostsResult posts, PageInfo page) {
         return new GetPostsResponse(posts, page);
     }
 }

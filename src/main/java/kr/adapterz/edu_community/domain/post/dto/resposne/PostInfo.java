@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.post.dto.resposne;
+package kr.adapterz.edu_community.domain.post.dto.internal;
 
 import kr.adapterz.edu_community.domain.post.entity.Post;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class PostResult {
+public class PostDto {
 
     private Long postId;
     private String title;
@@ -16,18 +16,18 @@ public class PostResult {
     private int likeCount;
     private int commentCount;
     private int hits;
-    private AuthorResult author;
+    private AuthorDto author;
     private LocalDateTime createdAt;
 
-    public static PostResult from(Post post, String profileImagePath) {
-        return new PostResult(
+    public static PostDto from(Post post, String profileImagePath) {
+        return new PostDto(
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
                 post.getLikeCount(),
                 post.getCommentCount(),
                 post.getHits(),
-                AuthorResult.of(
+                AuthorDto.of(
                         post.getAuthor().getId(),
                         post.getAuthor().getNickname(),
                         profileImagePath

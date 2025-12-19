@@ -2,10 +2,12 @@ package kr.adapterz.edu_community.domain.auth.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import kr.adapterz.edu_community.domain.auth.dto.internal.LoginResult;
+import kr.adapterz.edu_community.domain.auth.dto.internal.TokenResult;
 import kr.adapterz.edu_community.domain.auth.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.LoginRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.SignupRequest;
-import kr.adapterz.edu_community.domain.auth.dto.request.SignupResponse;
+import kr.adapterz.edu_community.domain.auth.dto.response.SignupResponse;
 import kr.adapterz.edu_community.domain.auth.dto.response.*;
 import kr.adapterz.edu_community.domain.auth.service.AuthService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
@@ -65,7 +67,7 @@ public class AuthController {
     // 액세스 토큰 재발급
     @PostMapping("/token/refresh")
         // Refresh Token을 HttpOnly 쿠키로 설정
-    public ApiResponse<TokenResponse> refreshAccessToken(
+    public ApiResponse<TokenInfo> refreshAccessToken(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
             HttpServletResponse httpResponse
     ) {

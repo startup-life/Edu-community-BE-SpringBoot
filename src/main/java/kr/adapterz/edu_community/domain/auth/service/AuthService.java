@@ -1,9 +1,11 @@
 package kr.adapterz.edu_community.domain.auth.service;
 
+import kr.adapterz.edu_community.domain.auth.dto.internal.LoginResult;
+import kr.adapterz.edu_community.domain.auth.dto.internal.TokenResult;
 import kr.adapterz.edu_community.domain.auth.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.LoginRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.SignupRequest;
-import kr.adapterz.edu_community.domain.auth.dto.request.SignupResponse;
+import kr.adapterz.edu_community.domain.auth.dto.response.SignupResponse;
 import kr.adapterz.edu_community.domain.auth.dto.response.*;
 import kr.adapterz.edu_community.domain.auth.entity.RefreshToken;
 import kr.adapterz.edu_community.domain.auth.repository.RefreshTokenRepository;
@@ -121,7 +123,7 @@ public class AuthService {
         );
 
         return new TokenResult(
-                new TokenResponse(newAccessToken, 3600),
+                new TokenInfo(newAccessToken, 3600),
                 newRefreshToken
         );
     }
