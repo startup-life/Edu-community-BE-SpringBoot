@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Table(name="users")
@@ -40,8 +42,18 @@ public class User extends BaseEntity {
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
-    public void updatePassword(String password) { this.password = password; }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
     public void updateProfileImageId(Long profileImageId) {
         this.profileImageId = profileImageId;
     }
+
+    public void withdraw() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+
 }

@@ -22,7 +22,7 @@ public class UserService {
     // 유저 정보 가져오기
     @Transactional(readOnly = true)
     public UserInfoResponse getUserInfo(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         String profileImagePath = "/public/images/profile/default.jpg";
@@ -40,17 +40,25 @@ public class UserService {
     }
 
     public void updateUser(Long userId, UpdateUserRequest updateUserRequest) {
-        User user = userRepository.findById(userId)
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("user_not_found"));
+
+    user.updateNickname(updateUserRequest.getNickname());
+
+    if (updateUserRequest.getProfileImagePath() != null) {
+        File newProfileImage = fileRepository.findByFilePath(updateUserRequest.getProfileImagePath())
+                .orElseThrow(() -> new NotFoundException("file_not_found"));
+        user.updateProfileImageId(newProfileImage.getId());
+    }
+
+    userRepository.save(user);
+}
+
+    public void withdrawUser(Long userId) {
+    User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
-        user.updateNickname(updateUserRequest.getNickname());
-
-        if (updateUserRequest.getProfileImagePath() != null) {
-            File newProfileImage = fileRepository.findByFilePath(updateUserRequest.getProfileImagePath())
-                    .orElseThrow(() -> new NotFoundException("file_not_found"));
-            user.updateProfileImageId(newProfileImage.getId());
-        }
-
+        user.withdraw();
         userRepository.save(user);
     }
 }
