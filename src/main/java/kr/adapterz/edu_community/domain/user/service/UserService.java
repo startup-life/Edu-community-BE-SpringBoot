@@ -2,8 +2,8 @@ package kr.adapterz.edu_community.domain.user.service;
 
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
-import kr.adapterz.edu_community.domain.user.dto.UpdateUserRequest;
-import kr.adapterz.edu_community.domain.user.dto.UserInfoResponse;
+import kr.adapterz.edu_community.domain.user.dto.request.UpdateUserRequest;
+import kr.adapterz.edu_community.domain.user.dto.response.UserInfoResponse;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import kr.adapterz.edu_community.global.common.exception.NotFoundException;

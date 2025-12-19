@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.user.dto;
+package kr.adapterz.edu_community.domain.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -6,9 +6,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UpdateUserRequest {
+public class ChangePasswordRequest {
 
     @NotBlank(message = "required")
-    private String nickname;
-    private String profileImagePath;
+    private String password;
 }

@@ -1,8 +1,8 @@
 package kr.adapterz.edu_community.domain.user.controller;
 
 import jakarta.validation.Valid;
-import kr.adapterz.edu_community.domain.user.dto.UpdateUserRequest;
-import kr.adapterz.edu_community.domain.user.dto.UserInfoResponse;
+import kr.adapterz.edu_community.domain.user.dto.request.UpdateUserRequest;
+import kr.adapterz.edu_community.domain.user.dto.response.UserInfoResponse;
 import kr.adapterz.edu_community.domain.user.service.UserService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;

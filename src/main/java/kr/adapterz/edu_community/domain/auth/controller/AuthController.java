@@ -2,7 +2,11 @@ package kr.adapterz.edu_community.domain.auth.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import kr.adapterz.edu_community.domain.auth.dto.*;
+import kr.adapterz.edu_community.domain.auth.dto.request.ChangePasswordRequest;
+import kr.adapterz.edu_community.domain.auth.dto.request.LoginRequest;
+import kr.adapterz.edu_community.domain.auth.dto.request.SignupRequest;
+import kr.adapterz.edu_community.domain.auth.dto.request.SignupResponse;
+import kr.adapterz.edu_community.domain.auth.dto.response.*;
 import kr.adapterz.edu_community.domain.auth.service.AuthService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
