@@ -43,4 +43,18 @@ public class UserController {
                 null
         );
     }
+
+    // 회원 탈퇴
+    @DeleteMapping("/me")
+    public ApiResponse<Void> withdrawUser(
+            @AuthenticationPrincipal Long userId
+    ) {
+        userService.withdrawUser(userId);
+
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "withdraw_user_success",
+                null
+        );
+    }
 }
