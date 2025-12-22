@@ -8,6 +8,7 @@ import kr.adapterz.edu_community.domain.post.dto.response.PostInfo;
 import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.entity.Post;
+import kr.adapterz.edu_community.domain.post.repository.PostQueryRepository;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostQueryRepository postQueryRepository;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
 
@@ -42,7 +44,7 @@ public class PostService {
     public PostsResponse getPosts(int page, int size, String sortBy, String direction) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
 
-        Page<Post> postsPage = postRepository.findAllByDeletedAtIsNull(pageable);
+        Page<Post> postsPage = postRepository.findPage(pageable);
         List<Post> posts = postsPage.getContent();
 
         if (posts.isEmpty()) {
@@ -62,12 +64,11 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponse getPost(Long postId) {
         // 게시글 조회
-        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found" + postId));
+        Post post = postQueryRepository.findByIdWithAuthor(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found"));
 
         // 작성자 조회
-        User user = userRepository.findByIdAndDeletedAtIsNull(post.getAuthor().getId())
-                .orElseThrow(() -> new NotFoundException("user_not_found" + post.getAuthor().getId()));
+        User user = post.getAuthor();
 
         // 프로필 이미지 경로 조회
         String profileImagePath = DEFAULT_PROFILE_IMAGE_PATH;
@@ -78,13 +79,13 @@ public class PostService {
         }
 
         // 첨부 파일 조회
-        File file = null;
+        File attachFile = null;
         if (post.getAttachFileId() != null) {
-            file = fileRepository.findById(post.getAttachFileId())
+            attachFile = fileRepository.findById(post.getAttachFileId())
                     .orElse(null);
         }
 
-        return PostResponse.from(post, user, profileImagePath, file);
+        return PostResponse.from(post, user, profileImagePath, attachFile);
     }
 
     // ================================= 내부 메서드 =================================//
