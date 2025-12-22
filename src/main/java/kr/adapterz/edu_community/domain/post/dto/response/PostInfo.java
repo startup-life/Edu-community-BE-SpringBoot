@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.domain.post.dto.resposne;
+package kr.adapterz.edu_community.domain.post.dto.response;
 
 import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.user.entity.User;

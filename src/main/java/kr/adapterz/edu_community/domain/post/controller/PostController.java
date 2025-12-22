@@ -1,6 +1,6 @@
 package kr.adapterz.edu_community.domain.post.controller;
 
-import kr.adapterz.edu_community.domain.post.dto.resposne.PostsResponse;
+import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.service.PostService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
