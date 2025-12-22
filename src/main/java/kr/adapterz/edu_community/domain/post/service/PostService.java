@@ -91,11 +91,30 @@ public class PostService {
 
     // 게시글 작성
     public Long createPost(Long authorId, CreatePostRequest createPostRequest) {
-        User author = userRepository.findByIdAndDeletedAtIsNull(authorId)
+        User author = userRepository.findActiveById(authorId)
                 .orElseThrow(() -> new NotFoundException("user_not_found" + authorId));
 
+        Post post;
 
-        return null;
+        if (createPostRequest.getAttachFilePath() == null) {
+            post = Post.create(
+                    createPostRequest.getTitle(),
+                    createPostRequest.getContent(),
+                    author
+            );
+        } else {
+            File file = fileRepository.findByFilePath(createPostRequest.getAttachFilePath())
+                    .orElseThrow(() -> new NotFoundException("file_not_found"));
+
+            post = Post.createWithFile(
+                    createPostRequest.getTitle(),
+                    createPostRequest.getContent(),
+                    file.getId(),
+                    author
+            );
+        }
+
+        return postRepository.save(post).getId();
     }
 
     // ================================= 내부 메서드 =================================//

@@ -55,6 +55,7 @@ public class PostController {
             @RequestBody CreatePostRequest createPostRequest
     ) {
         Long response = postService.createPost(userId, createPostRequest);
+
         return ApiResponse.of(
                 HttpStatus.CREATED,
                 "create_post_success",
