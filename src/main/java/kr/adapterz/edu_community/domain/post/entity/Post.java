@@ -53,5 +53,21 @@ public class Post extends BaseEntity {
         this.author = author;
     }
 
-    // Business Methods
+    // Factory method
+    public static Post create(
+            String title,
+            String content,
+            User author
+    ) {
+        return new Post(title, content, author);
+    }
+
+    public static Post createWithFile(
+            String title,
+            String content,
+            Long attachFileId,
+            User author
+    ) {
+        return new Post(title, content, attachFileId, author);
+    }
 }

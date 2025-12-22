@@ -3,10 +3,13 @@ package kr.adapterz.edu_community.domain.post.service;
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.post.dto.internal.PostRelationData;
+import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.response.PageInfo;
 import kr.adapterz.edu_community.domain.post.dto.response.PostInfo;
+import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.entity.Post;
+import kr.adapterz.edu_community.domain.post.repository.PostQueryRepository;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
@@ -31,14 +34,18 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostQueryRepository postQueryRepository;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
 
+    private final String DEFAULT_PROFILE_IMAGE_PATH = "/public/images/profile/default.jpg";
+
+    // 개사굴 목록 조회
     @Transactional(readOnly = true)
     public PostsResponse getPosts(int page, int size, String sortBy, String direction) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
 
-        Page<Post> postsPage = postRepository.findAllByDeletedAtIsNull(pageable);
+        Page<Post> postsPage = postRepository.findPage(pageable);
         List<Post> posts = postsPage.getContent();
 
         if (posts.isEmpty()) {
@@ -52,6 +59,62 @@ public class PostService {
                 .toList();
 
         return PostsResponse.of(postResults, PageInfo.from(postsPage));
+    }
+
+    // 게시글 상세 조회
+    @Transactional(readOnly = true)
+    public PostResponse getPost(Long postId) {
+        // 게시글 조회
+        Post post = postQueryRepository.findByIdWithAuthor(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found"));
+
+        // 작성자 조회
+        User user = post.getAuthor();
+
+        // 프로필 이미지 경로 조회
+        String profileImagePath = DEFAULT_PROFILE_IMAGE_PATH;
+        if (user.getProfileImageId() != null) {
+            profileImagePath = fileRepository.findById(user.getProfileImageId())
+                    .map(File::getFilePath)
+                    .orElse(DEFAULT_PROFILE_IMAGE_PATH);
+        }
+
+        // 첨부 파일 조회
+        File attachFile = null;
+        if (post.getAttachFileId() != null) {
+            attachFile = fileRepository.findById(post.getAttachFileId())
+                    .orElse(null);
+        }
+
+        return PostResponse.from(post, user, profileImagePath, attachFile);
+    }
+
+    // 게시글 작성
+    public Long createPost(Long authorId, CreatePostRequest createPostRequest) {
+        User author = userRepository.findActiveById(authorId)
+                .orElseThrow(() -> new NotFoundException("user_not_found" + authorId));
+
+        Post post;
+
+        if (createPostRequest.getAttachFilePath() == null) {
+            post = Post.create(
+                    createPostRequest.getTitle(),
+                    createPostRequest.getContent(),
+                    author
+            );
+        } else {
+            File file = fileRepository.findByFilePath(createPostRequest.getAttachFilePath())
+                    .orElseThrow(() -> new NotFoundException("file_not_found"));
+
+            post = Post.createWithFile(
+                    createPostRequest.getTitle(),
+                    createPostRequest.getContent(),
+                    file.getId(),
+                    author
+            );
+        }
+
+        return postRepository.save(post).getId();
     }
 
     // ================================= 내부 메서드 =================================//
@@ -69,7 +132,7 @@ public class PostService {
                 .distinct()
                 .toList();
 
-        Map<Long, User> userMap = userRepository.findAllByIdInAndDeletedAtIsNull(authorIds).stream()
+        Map<Long, User> userMap = userRepository.findAllActiveByIds(authorIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         List<Long> fileIds = userMap.values().stream()
@@ -101,7 +164,7 @@ public class PostService {
 
     // 프로필 이미지 경로 설정 메서드
     private String setProfileImagePath(User user, PostRelationData data) {
-        String profileImagePath = "/public/images/profile/default.jpg";
+        String profileImagePath = DEFAULT_PROFILE_IMAGE_PATH;
 
         if (user.getProfileImageId() != null) {
             File file = data.getFileMap().get(user.getProfileImageId());
