@@ -3,6 +3,7 @@ package kr.adapterz.edu_community.domain.post.service;
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.post.dto.internal.PostRelationData;
+import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.response.PageInfo;
 import kr.adapterz.edu_community.domain.post.dto.response.PostInfo;
 import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
@@ -86,6 +87,15 @@ public class PostService {
         }
 
         return PostResponse.from(post, user, profileImagePath, attachFile);
+    }
+
+    // 게시글 작성
+    public Long createPost(Long authorId, CreatePostRequest createPostRequest) {
+        User author = userRepository.findByIdAndDeletedAtIsNull(authorId)
+                .orElseThrow(() -> new NotFoundException("user_not_found" + authorId));
+
+
+        return null;
     }
 
     // ================================= 내부 메서드 =================================//
