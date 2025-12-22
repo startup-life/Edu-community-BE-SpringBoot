@@ -34,42 +34,6 @@ public class PostService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
 
-    /*
-    N+1 문제 발생 코드
-    public PostsResponse getPosts(int page, int size, String sortBy, String direction) {
-
-        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
-
-        Page<Post> postsPage = postRepository.findAllByDeletedAtIsNull(pageable);
-
-        List<PostInfo> postResults = postsPage.getContent().stream()
-                .map(post -> {
-                    return PostInfo.from(post, getAuthorProfileImagePath(post.getAuthor().getId()));
-                })
-                .toList();
-
-        return PostsResponse.of(
-                postResults,
-                PageInfo.from(postsPage)
-        );
-
-    }
-
-    private String getAuthorProfileImagePath(Long authorId) {
-        User user = userRepository.findById(authorId)
-                .orElseThrow(() -> new NotFoundException("user not found"));
-
-        String profileImagePath = "/public/images/profile/default.jpg";
-        if (user.getProfileImageId() != null) {
-            profileImagePath = fileRepository.findById(user.getProfileImageId())
-                    .map(File::getFilePath)
-                    .orElse(profileImagePath);
-        }
-
-        return profileImagePath;
-    }*/
-
     @Transactional(readOnly = true)
     public PostsResponse getPosts(int page, int size, String sortBy, String direction) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
