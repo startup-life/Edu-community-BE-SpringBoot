@@ -22,7 +22,7 @@ public class UserService {
     // 유저 정보 가져오기
     @Transactional(readOnly = true)
     public UserInfoResponse getUserInfo(Long userId) {
-        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         String profileImagePath = "/public/images/profile/default.jpg";
@@ -40,7 +40,7 @@ public class UserService {
     }
 
     public void updateUser(Long userId, UpdateUserRequest updateUserRequest) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         user.updateNickname(updateUserRequest.getNickname());
@@ -55,7 +55,7 @@ public class UserService {
     }
 
     public void withdrawUser(Long userId) {
-    User user = userRepository.findById(userId)
+    User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         user.withdraw();

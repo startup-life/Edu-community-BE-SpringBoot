@@ -103,7 +103,7 @@ public class PostService {
                 .distinct()
                 .toList();
 
-        Map<Long, User> userMap = userRepository.findAllByIdInAndDeletedAtIsNull(authorIds).stream()
+        Map<Long, User> userMap = userRepository.findAllActiveByIds(authorIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         List<Long> fileIds = userMap.values().stream()

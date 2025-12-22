@@ -57,7 +57,7 @@ public class AuthService {
     // 로그인
     public LoginResult login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findActiveByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new AuthorizedException("invalid_credentials")
                 );
@@ -102,7 +102,7 @@ public class AuthService {
             throw new AuthorizedException("refresh_token_expired");
         }
 
-        User user = userRepository.findById(saved.getUserId())
+        User user = userRepository.findActiveById(saved.getUserId())
                 .orElseThrow(() -> new AuthorizedException("invalid_refresh_token"));
 
         String newAccessToken = jwtProvider.createAccessToken(
@@ -131,7 +131,7 @@ public class AuthService {
     // 로그인 상태 검증
     @Transactional(readOnly = true)
     public AuthStatusResponse checkAuthStatus(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         String profileImagePath = "/public/images/profile/default.jpg";
@@ -155,7 +155,7 @@ public class AuthService {
             Long userId,
             @RequestBody ChangePasswordRequest changePasswordRequest
     ) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         String newPassword = passwordEncoder.encode(changePasswordRequest.getPassword());
@@ -166,7 +166,7 @@ public class AuthService {
     // 중복 이메일 검사
     @Transactional(readOnly = true)
     public void validateDuplicateEmail(String email) {
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsActiveByEmail(email)) {
             throw new DuplicateException("email_already_exists");
         }
     }
@@ -174,7 +174,7 @@ public class AuthService {
     // 중복 닉네임 검사
     @Transactional(readOnly = true)
     public void validateDuplicateNickname(String nickname) {
-        if (userRepository.existsByNickname(nickname)) {
+        if (userRepository.existsActiveByNickname(nickname)) {
             throw new DuplicateException("nickname_already_exists");
         }
     }
