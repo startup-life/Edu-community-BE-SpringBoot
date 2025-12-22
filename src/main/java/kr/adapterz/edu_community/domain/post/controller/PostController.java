@@ -1,14 +1,12 @@
 package kr.adapterz.edu_community.domain.post.controller;
 
+import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.service.PostService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -29,6 +27,19 @@ public class PostController {
         return ApiResponse.of(
                 HttpStatus.OK,
                 "get_posts_success",
+                response
+        );
+    }
+
+    @GetMapping("/{post_id}")
+    public ApiResponse<PostResponse> getPost(
+            @PathVariable("post_id") Long postId
+    ) {
+        PostResponse response = postService.getPost(postId);
+
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "get_post_success",
                 response
         );
     }

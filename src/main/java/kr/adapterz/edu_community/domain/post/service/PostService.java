@@ -5,6 +5,7 @@ import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.post.dto.internal.PostRelationData;
 import kr.adapterz.edu_community.domain.post.dto.response.PageInfo;
 import kr.adapterz.edu_community.domain.post.dto.response.PostInfo;
+import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
@@ -34,6 +35,9 @@ public class PostService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
 
+    private final String DEFAULT_PROFILE_IMAGE_PATH = "/public/images/profile/default.jpg";
+
+    // 개사굴 목록 조회
     @Transactional(readOnly = true)
     public PostsResponse getPosts(int page, int size, String sortBy, String direction) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
@@ -52,6 +56,35 @@ public class PostService {
                 .toList();
 
         return PostsResponse.of(postResults, PageInfo.from(postsPage));
+    }
+
+    // 게시글 상세 조회
+    @Transactional(readOnly = true)
+    public PostResponse getPost(Long postId) {
+        // 게시글 조회
+        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found" + postId));
+
+        // 작성자 조회
+        User user = userRepository.findByIdAndDeletedAtIsNull(post.getAuthor().getId())
+                .orElseThrow(() -> new NotFoundException("user_not_found" + post.getAuthor().getId()));
+
+        // 프로필 이미지 경로 조회
+        String profileImagePath = DEFAULT_PROFILE_IMAGE_PATH;
+        if (user.getProfileImageId() != null) {
+            profileImagePath = fileRepository.findById(user.getProfileImageId())
+                    .map(File::getFilePath)
+                    .orElse(DEFAULT_PROFILE_IMAGE_PATH);
+        }
+
+        // 첨부 파일 조회
+        File file = null;
+        if (post.getAttachFileId() != null) {
+            file = fileRepository.findById(post.getAttachFileId())
+                    .orElse(null);
+        }
+
+        return PostResponse.from(post, user, profileImagePath, file);
     }
 
     // ================================= 내부 메서드 =================================//
@@ -101,7 +134,7 @@ public class PostService {
 
     // 프로필 이미지 경로 설정 메서드
     private String setProfileImagePath(User user, PostRelationData data) {
-        String profileImagePath = "/public/images/profile/default.jpg";
+        String profileImagePath = DEFAULT_PROFILE_IMAGE_PATH;
 
         if (user.getProfileImageId() != null) {
             File file = data.getFileMap().get(user.getProfileImageId());

@@ -1,0 +1,43 @@
+package kr.adapterz.edu_community.domain.post.dto.response;
+
+import kr.adapterz.edu_community.domain.file.entity.File;
+import kr.adapterz.edu_community.domain.post.entity.Post;
+import kr.adapterz.edu_community.domain.user.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+@Getter
+@AllArgsConstructor
+public class PostResponse {
+
+    private Long postId;
+    private String title;
+    private String content;
+    private int likeCount;
+    private int commentCount;
+    private int hits;
+    private AuthorInfo author;
+    private AttachFileInfo file;
+    private LocalDateTime createdAt;
+
+    public static PostResponse from(
+            Post post,
+            User user,
+            String profileImagePath,
+            File file
+    ) {
+        return new PostResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getLikeCount(),
+                post.getCommentCount(),
+                post.getHits(),
+                AuthorInfo.from(user, profileImagePath),
+                file != null ? AttachFileInfo.from(file) : null,
+                post.getCreatedAt()
+        );
+    }
+}
