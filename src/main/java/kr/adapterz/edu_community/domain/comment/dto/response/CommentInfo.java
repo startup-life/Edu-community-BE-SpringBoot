@@ -1,8 +1,6 @@
 package kr.adapterz.edu_community.domain.comment.dto.response;
 
-import kr.adapterz.edu_community.domain.comment.entity.Comment;
 import kr.adapterz.edu_community.domain.post.dto.response.AuthorInfo;
-import kr.adapterz.edu_community.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,16 +15,17 @@ public class CommentInfo {
     private AuthorInfo author;
     private LocalDateTime createdAt;
 
-    public static CommentInfo from(Comment comment, User user, String profileImagePath) {
+    public static CommentInfo of(
+            Long commentId,
+            String content,
+            AuthorInfo author,
+            LocalDateTime createdAt
+    ) {
         return new CommentInfo(
-                comment.getId(),
-                comment.getContent(),
-                AuthorInfo.of(
-                        user.getId(),
-                        user.getNickname(),
-                        profileImagePath
-                ),
-                comment.getCreatedAt()
+                commentId,
+                content,
+                author,
+                createdAt
         );
     }
 }

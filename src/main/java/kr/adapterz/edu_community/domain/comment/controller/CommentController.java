@@ -1,6 +1,7 @@
 package kr.adapterz.edu_community.domain.comment.controller;
 
 import kr.adapterz.edu_community.domain.comment.dto.response.CommentsResponse;
+import kr.adapterz.edu_community.domain.comment.service.CommentService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,8 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @GetMapping("")
+    // 특정 게시글의 댓글 조회
+    @GetMapping()
     public ApiResponse<CommentsResponse> getComments(
             @PathVariable("post_id") Long postId
     ) {
