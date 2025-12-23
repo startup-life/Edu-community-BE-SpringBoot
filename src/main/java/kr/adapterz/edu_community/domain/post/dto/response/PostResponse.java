@@ -19,28 +19,6 @@ public class PostResponse {
     private AttachFileInfo file;
     private LocalDateTime createdAt;
 
-    /*public static PostResponse from(
-            Post post,
-            User user,
-            String profileImagePath,
-            File file
-    ) {
-        return new PostResponse(
-                post.getId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getLikeCount(),
-                post.getCommentCount(),
-                post.getHits(),
-                AuthorInfo.of(
-                        user.getId(),
-                        user.getNickname(),
-                        profileImagePath
-                ),
-                file != null ? AttachFileInfo.from(file) : null,
-                post.getCreatedAt()
-        );
-    }*/
     public static PostResponse of(
             Long postId,
             String title,

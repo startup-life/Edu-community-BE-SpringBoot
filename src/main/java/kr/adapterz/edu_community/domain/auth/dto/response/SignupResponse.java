@@ -1,17 +1,16 @@
 package kr.adapterz.edu_community.domain.auth.dto.response;
 
-import kr.adapterz.edu_community.domain.user.entity.User;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@Builder
+@AllArgsConstructor
 public class SignupResponse {
     private Long userId;
 
-    public static SignupResponse from(User user) {
-        return SignupResponse.builder()
-                .userId(user.getId())
-                .build();
+    public static SignupResponse of(Long userId) {
+        return new SignupResponse(
+                userId
+        );
     }
 }

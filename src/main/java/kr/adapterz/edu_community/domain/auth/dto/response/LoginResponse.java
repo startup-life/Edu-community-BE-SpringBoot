@@ -17,7 +17,11 @@ public class LoginResponse {
             long expiresIn
     ) {
         return new LoginResponse(
-                UserInfo.from(user),
+                UserInfo.of(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getNickname()
+                ),
                 new TokenInfo(accessToken, expiresIn)
         );
     }

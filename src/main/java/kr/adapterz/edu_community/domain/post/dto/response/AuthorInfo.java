@@ -21,15 +21,4 @@ public class AuthorInfo {
                 profileImagePath
         );
     }
-
-    /*public static AuthorInfo from(
-            User user,
-            String profileImagePath
-    ) {
-        return new AuthorInfo(
-                user.getId(),
-                user.getNickname(),
-                profileImagePath
-        );
-    }*/
 }

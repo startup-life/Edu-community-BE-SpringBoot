@@ -51,7 +51,7 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        return SignupResponse.from(savedUser);
+        return SignupResponse.of(savedUser.getId());
     }
 
     // 로그인

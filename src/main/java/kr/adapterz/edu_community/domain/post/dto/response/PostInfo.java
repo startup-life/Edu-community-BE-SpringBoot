@@ -18,22 +18,6 @@ public class PostInfo {
     private AuthorInfo author;
     private LocalDateTime createdAt;
 
-    /*public static PostInfo from(Post post, User user, String profileImagePath) {
-        return new PostInfo(
-                post.getId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getLikeCount(),
-                post.getCommentCount(),
-                post.getHits(),
-                AuthorInfo.of(
-                        user.getId(),
-                        user.getNickname(),
-                        profileImagePath
-                ),
-                post.getCreatedAt()
-        );
-    }*/
     public static PostInfo of(
             Long postId,
             String title,
