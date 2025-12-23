@@ -78,4 +78,18 @@ public class PostController {
                 response
         );
     }
+
+    // 게시글 삭제
+    @DeleteMapping("/{post_id}")
+    public ApiResponse<Void> deletePost(
+        @PathVariable("post_id")  Long postId
+    ) {
+        postService.deletePost(postId);
+
+        return ApiResponse.of(
+                HttpStatus.NO_CONTENT,
+                "delete_post_success",
+                null
+        );
+    }
 }

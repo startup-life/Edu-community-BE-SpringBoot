@@ -6,6 +6,8 @@ import kr.adapterz.edu_community.global.common.entity.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -80,5 +82,9 @@ public class Post extends BaseEntity {
         this.title = title;
         this.content = content;
         this.attachFileId = attachFileId;
+    }
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

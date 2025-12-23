@@ -134,6 +134,13 @@ public class PostService {
         return post.getId();
     }
 
+    // 게시글 삭제
+    public void deletePost(Long postId) {
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found"));
+        post.delete();
+    }
+
     // ================================= 내부 메서드 =================================//
 
     // Pageable 생성 메서드
