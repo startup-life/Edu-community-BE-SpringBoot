@@ -39,3 +39,5 @@ out/
 ### Static files ###
 /uploads/profile/*
 !/uploads/profile/.gitkeep
+/uploads/post/*
+!/uploads/post/.gitkeep

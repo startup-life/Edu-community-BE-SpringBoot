@@ -8,10 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -36,6 +34,22 @@ public class FileController {
                 new FileUploadResponse(savedFile.getFilePath())
         );
     }
+
+    // 게시글 첨부파일 업로드
+    @PostMapping("/posts/image")
+    public ApiResponse<FileUploadResponse> uploadPostAttachImage(
+            @AuthenticationPrincipal Long userId,
+            @RequestPart("attachImage") MultipartFile file
+    ) throws FileUploadException {
+        File savedFile = fileService.uploadPostAttachImage(file, userId);
+
+        return ApiResponse.ok(
+                "post_attach_image_upload_success",
+                new FileUploadResponse(savedFile.getFilePath())
+        );
+    }
+
+    // ========== Private Methods ==========
 
     private Long resolveUserId(Authentication authentication) {
         if (authentication == null) {
