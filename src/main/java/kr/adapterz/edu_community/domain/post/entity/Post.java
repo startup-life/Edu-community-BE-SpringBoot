@@ -1,6 +1,7 @@
 package kr.adapterz.edu_community.domain.post.entity;
 
 import jakarta.persistence.*;
+import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.global.common.entity.BaseEntity;
 import lombok.Getter;
@@ -25,8 +26,9 @@ public class Post extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "file_id")
-    private Long attachFileId;
+    @ManyToOne(fetch= FetchType.LAZY)
+    @JoinColumn(name = "file_id")
+    private File attachFile;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -48,40 +50,46 @@ public class Post extends BaseEntity {
         this.author = author;
     }
 
-    public Post(String title, String content, Long attachFileId, User author) {
+    public Post(
+            String title,
+            String content,
+            User author,
+            File attachFile
+    ) {
         this.title = title;
         this.content = content;
-        this.attachFileId = attachFileId;
         this.author = author;
+        this.attachFile = attachFile;
     }
 
     // Factory method
     public static Post create(
             String title,
             String content,
-            User author
+            User author,
+            File attachFile
     ) {
-        return new Post(title, content, author);
+        return new Post(title, content, author, attachFile);
     }
 
     public static Post createWithFile(
             String title,
             String content,
-            Long attachFileId,
-            User author
+            User author,
+            File attachFile
     ) {
-        return new Post(title, content, attachFileId, author);
+        return new Post(title, content, author, attachFile);
     }
 
     // Business methods
     public void update(
             String title,
             String content,
-            Long attachFileId
+            File attachFile
     ) {
         this.title = title;
         this.content = content;
-        this.attachFileId = attachFileId;
+        this.attachFile = attachFile;
     }
 
     public void delete() {

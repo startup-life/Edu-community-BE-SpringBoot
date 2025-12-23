@@ -1,6 +1,5 @@
 package kr.adapterz.edu_community.domain.user.dto.response;
 
-import kr.adapterz.edu_community.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -16,13 +15,15 @@ public class UserInfoResponse {
     private String profileImagePath;
     private LocalDateTime createdAt;
 
-    public static UserInfoResponse of(User user, String profileImagePath) {
+    public static UserInfoResponse of(
+            Long userId,
+            String email,
+            String nickname,
+            String profileImagePath,
+            LocalDateTime createdAt
+    ) {
         return new UserInfoResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getNickname(),
-                profileImagePath,
-                user.getCreatedAt()
+                userId, email, nickname, profileImagePath, createdAt
         );
     }
 }

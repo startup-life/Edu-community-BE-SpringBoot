@@ -32,8 +32,8 @@ public class FileService {
     private static final Path PROFILE_DIR = PROJECT_ROOT.resolve("uploads/profile");  // 프로필 이미지 저장 디렉토리
     private static final Path POST_DIR = PROJECT_ROOT.resolve("uploads/post");      // 게시글 첨부파일 저장 디렉토리
 
-    private static final String PROFILE_URL = "/public/profile";    // 클라이언트 접근 URL
-    private static final String POST_URL = "/public/post";          // 클라이언트 접근 URL
+    private static final String PROFILE_URL = "/public/profile/";    // 클라이언트 접근 URL
+    private static final String POST_URL = "/public/post/";          // 클라이언트 접근 URL
 
 
     // 프로필 이미지 업로드
@@ -78,7 +78,7 @@ public class FileService {
 
         return fileRepository.save(
                 createPostAttachImage(
-                        PROFILE_URL + filename,
+                        POST_URL + filename,
                         userId
                 )
         );

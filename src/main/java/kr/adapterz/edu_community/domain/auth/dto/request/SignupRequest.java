@@ -20,4 +20,6 @@ public class SignupRequest {
 
     @NotBlank(message = "required")
     private String nickname;
+
+    private String profileImagePath;
 }
