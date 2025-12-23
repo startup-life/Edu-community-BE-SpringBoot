@@ -70,4 +70,15 @@ public class Post extends BaseEntity {
     ) {
         return new Post(title, content, attachFileId, author);
     }
+
+    // Business methods
+    public void update(
+            String title,
+            String content,
+            Long attachFileId
+    ) {
+        this.title = title;
+        this.content = content;
+        this.attachFileId = attachFileId;
+    }
 }

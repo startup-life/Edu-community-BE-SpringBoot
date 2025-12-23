@@ -1,6 +1,7 @@
 package kr.adapterz.edu_community.domain.post.controller;
 
 import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
+import kr.adapterz.edu_community.domain.post.dto.request.UpdatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.service.PostService;
@@ -59,6 +60,21 @@ public class PostController {
         return ApiResponse.of(
                 HttpStatus.CREATED,
                 "create_post_success",
+                response
+        );
+    }
+
+    // 게시글 수정
+    @PutMapping("/{post_id}")
+    public ApiResponse<Long> updatePost(
+            @PathVariable("post_id") Long postId,
+            @RequestBody UpdatePostRequest updatePostRequest
+    ) {
+        Long response = postService.updatePost(postId, updatePostRequest);
+
+        return ApiResponse.of(
+                HttpStatus.OK,
+                "update_post_success",
                 response
         );
     }
