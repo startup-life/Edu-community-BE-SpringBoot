@@ -5,10 +5,7 @@ import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.post.dto.internal.PostRelationData;
 import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.request.UpdatePostRequest;
-import kr.adapterz.edu_community.domain.post.dto.response.PageInfo;
-import kr.adapterz.edu_community.domain.post.dto.response.PostInfo;
-import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
-import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
+import kr.adapterz.edu_community.domain.post.dto.response.*;
 import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.post.repository.PostQueryRepository;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
@@ -87,7 +84,22 @@ public class PostService {
                     .orElse(null);
         }
 
-        return PostResponse.from(post, user, profileImagePath, attachFile);
+//        return PostResponse.from(post, user, profileImagePath, attachFile);
+        return PostResponse.of(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getLikeCount(),
+                post.getCommentCount(),
+                post.getHits(),
+                AuthorInfo.of(
+                        user.getId(),
+                        user.getNickname(),
+                        profileImagePath
+                ),
+                attachFile != null ? AttachFileInfo.of(attachFile.getId(), attachFile.getFilePath()) : null,
+                post.getCreatedAt()
+        );
     }
 
     // 게시글 작성
@@ -183,7 +195,20 @@ public class PostService {
 
         String profileImagePath = setProfileImagePath(user, data);
 
-        return PostInfo.from(post, user, profileImagePath);
+        return PostInfo.of(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getLikeCount(),
+                post.getCommentCount(),
+                post.getHits(),
+                AuthorInfo.of(
+                        user.getId(),
+                        user.getNickname(),
+                        profileImagePath
+                ),
+                post.getCreatedAt()
+        );
     }
 
     // 프로필 이미지 경로 설정 메서드

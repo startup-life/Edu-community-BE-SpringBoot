@@ -1,6 +1,5 @@
 package kr.adapterz.edu_community.domain.post.dto.response;
 
-import kr.adapterz.edu_community.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,11 +11,18 @@ public class AuthorInfo {
     private String nickname;
     private String profileImagePath;
 
-    public static AuthorInfo of(Long userId, String nickname, String profileImagePath) {
-        return new AuthorInfo(userId, nickname, profileImagePath);
+    public static AuthorInfo of(
+            Long userId,
+            String nickname,
+            String profileImagePath) {
+        return new AuthorInfo(
+                userId,
+                nickname,
+                profileImagePath
+        );
     }
 
-    public static AuthorInfo from(
+    /*public static AuthorInfo from(
             User user,
             String profileImagePath
     ) {
@@ -25,5 +31,5 @@ public class AuthorInfo {
                 user.getNickname(),
                 profileImagePath
         );
-    }
+    }*/
 }

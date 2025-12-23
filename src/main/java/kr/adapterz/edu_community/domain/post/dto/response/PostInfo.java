@@ -1,7 +1,5 @@
 package kr.adapterz.edu_community.domain.post.dto.response;
 
-import kr.adapterz.edu_community.domain.post.entity.Post;
-import kr.adapterz.edu_community.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,7 +18,7 @@ public class PostInfo {
     private AuthorInfo author;
     private LocalDateTime createdAt;
 
-    public static PostInfo from(Post post, User user, String profileImagePath) {
+    /*public static PostInfo from(Post post, User user, String profileImagePath) {
         return new PostInfo(
                 post.getId(),
                 post.getTitle(),
@@ -34,6 +32,22 @@ public class PostInfo {
                         profileImagePath
                 ),
                 post.getCreatedAt()
+        );
+    }*/
+    public static PostInfo of(
+            Long postId,
+            String title,
+            String content,
+            int likeCount,
+            int commentCount,
+            int hits,
+            AuthorInfo author,
+            LocalDateTime createdAt
+    ) {
+        return new PostInfo(
+                postId, title, content,
+                likeCount, commentCount, hits,
+                author, createdAt
         );
     }
 }
