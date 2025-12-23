@@ -4,6 +4,7 @@ import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.post.dto.internal.PostRelationData;
 import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
+import kr.adapterz.edu_community.domain.post.dto.request.UpdatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.response.PageInfo;
 import kr.adapterz.edu_community.domain.post.dto.response.PostInfo;
 import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
@@ -117,6 +118,22 @@ public class PostService {
         return postRepository.save(post).getId();
     }
 
+    // 게시글 수정
+    public Long updatePost(Long postId, UpdatePostRequest updatePostRequest) {
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found"));
+
+        Long fileId = resolvedFileId(updatePostRequest.getAttachFilePath());
+
+        post.update(
+                updatePostRequest.getTitle(),
+                updatePostRequest.getContent(),
+                fileId
+        );
+
+        return post.getId();
+    }
+
     // ================================= 내부 메서드 =================================//
 
     // Pageable 생성 메서드
@@ -174,5 +191,15 @@ public class PostService {
         }
 
         return profileImagePath;
+    }
+
+    private Long resolvedFileId(String attachFilePath) {
+        if (attachFilePath == null) {
+            return null;
+        }
+
+        return fileRepository.findByFilePath(attachFilePath)
+                .orElseThrow(() -> new NotFoundException("file_not_found"))
+                .getId();
     }
 }

@@ -33,5 +33,12 @@ public class File extends BaseEntity {
         this.uploaderId = uploaderId;
     }
 
-    // Business Methods
+    // Factory Methods
+    public static File createProfileImage(String filePath, Long uploaderId) {
+        return new File(filePath, FileCategory.PROFILE_IMAGE, uploaderId);
+    }
+
+    public static File createPostAttachImage(String filePath, Long uploaderId) {
+        return new File(filePath, FileCategory.POST_ATTACHMENT, uploaderId);
+    }
 }
