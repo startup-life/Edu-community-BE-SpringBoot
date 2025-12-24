@@ -18,8 +18,8 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
         return entityManager.createQuery("""
         select c
         from Comment c
-        join fetch c.author
-        left join fetch c.author.profileImageId.
+        join fetch c.author u
+        left join fetch u.profileImage
         where c.post.id = :postId
         and c.deletedAt is null
         order by c.createdAt asc
