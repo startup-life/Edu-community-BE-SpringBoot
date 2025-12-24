@@ -1,6 +1,7 @@
 package kr.adapterz.edu_community.domain.user.entity;
 
 import jakarta.persistence.*;
+import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.global.common.entity.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,15 +28,16 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true, length = 30)
     private String nickname;
 
-    @Column(name = "file_id")
-    private Long profileImageId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id")
+    private File profileImage;
 
     // Constructor
-    public User(String email, String password, String nickname, Long profileImageId) {
+    public User(String email, String password, String nickname, File profileImage) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.profileImageId = profileImageId;
+        this.profileImage = profileImage;
     }
 
     // Business Methods
@@ -47,9 +49,7 @@ public class User extends BaseEntity {
         this.password = password;
     }
 
-    public void updateProfileImageId(Long profileImageId) {
-        this.profileImageId = profileImageId;
-    }
+    public void updateProfileImage(File profileImage) { this.profileImage = profileImage; }
 
     public void withdraw() {
         this.deletedAt = LocalDateTime.now();

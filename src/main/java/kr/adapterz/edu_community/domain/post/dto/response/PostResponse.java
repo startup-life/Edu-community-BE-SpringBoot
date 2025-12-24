@@ -1,8 +1,5 @@
 package kr.adapterz.edu_community.domain.post.dto.response;
 
-import kr.adapterz.edu_community.domain.file.entity.File;
-import kr.adapterz.edu_community.domain.post.entity.Post;
-import kr.adapterz.edu_community.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -22,22 +19,27 @@ public class PostResponse {
     private AttachFileInfo file;
     private LocalDateTime createdAt;
 
-    public static PostResponse from(
-            Post post,
-            User user,
-            String profileImagePath,
-            File file
+    public static PostResponse of(
+            Long postId,
+            String title,
+            String content,
+            int likeCount,
+            int commentCount,
+            int hits,
+            AuthorInfo author,
+            AttachFileInfo file,
+            LocalDateTime createdAt
     ) {
         return new PostResponse(
-                post.getId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getLikeCount(),
-                post.getCommentCount(),
-                post.getHits(),
-                AuthorInfo.from(user, profileImagePath),
-                file != null ? AttachFileInfo.from(file) : null,
-                post.getCreatedAt()
+                postId,
+                title,
+                content,
+                likeCount,
+                commentCount,
+                hits,
+                author,
+                file,
+                createdAt
         );
     }
 }

@@ -1,6 +1,5 @@
 package kr.adapterz.edu_community.domain.auth.dto.response;
 
-import kr.adapterz.edu_community.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,11 +11,15 @@ public class UserInfo {
     private String email;
     private String nickname;
 
-    public static UserInfo from(User user) {
+    public static UserInfo of(
+            Long id,
+            String email,
+            String nickname
+    ) {
         return new UserInfo(
-                user.getId(),
-                user.getEmail(),
-                user.getNickname()
+                id,
+                email,
+                nickname
         );
     }
 }

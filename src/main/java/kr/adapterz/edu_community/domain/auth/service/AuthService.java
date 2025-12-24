@@ -5,13 +5,16 @@ import kr.adapterz.edu_community.domain.auth.dto.internal.TokenResult;
 import kr.adapterz.edu_community.domain.auth.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.LoginRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.SignupRequest;
+import kr.adapterz.edu_community.domain.auth.dto.response.AuthStatusResponse;
+import kr.adapterz.edu_community.domain.auth.dto.response.LoginResponse;
 import kr.adapterz.edu_community.domain.auth.dto.response.SignupResponse;
-import kr.adapterz.edu_community.domain.auth.dto.response.*;
+import kr.adapterz.edu_community.domain.auth.dto.response.TokenInfo;
 import kr.adapterz.edu_community.domain.auth.entity.RefreshToken;
 import kr.adapterz.edu_community.domain.auth.repository.RefreshTokenRepository;
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
+import kr.adapterz.edu_community.domain.user.repository.UserQueryRepository;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import kr.adapterz.edu_community.global.common.exception.AuthorizedException;
 import kr.adapterz.edu_community.global.common.exception.DuplicateException;
@@ -31,39 +34,40 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final UserQueryRepository userQueryRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final FileRepository fileRepository;
+
+    private final String DEFAULT_PROFILE_IMAGE_PATH = "/public/profile/default.jpg";
 
     // 회원가입
     public SignupResponse signup(SignupRequest signupRequest) {
         validateDuplicateEmail(signupRequest.getEmail());
         validateDuplicateNickname(signupRequest.getNickname());
 
+        File profileImage = resolveProfileImage(signupRequest.getProfileImagePath());
 
         User user = new User(
                 signupRequest.getEmail(),
                 passwordEncoder.encode(signupRequest.getPassword()),
                 signupRequest.getNickname(),
-                null
+                profileImage
         );
 
         User savedUser = userRepository.save(user);
 
-        return SignupResponse.from(savedUser);
+        return SignupResponse.of(savedUser.getId());
     }
 
     // 로그인
-    public LoginResult login(LoginRequest request) {
-
-        User user = userRepository.findActiveByEmail(request.getEmail())
-                .orElseThrow(() ->
-                        new AuthorizedException("invalid_credentials")
-                );
+    public LoginResult login(LoginRequest loginRequest) {
+        User user = userQueryRepository.findActiveByEmailWithProfileImage(loginRequest.getEmail())
+                .orElseThrow(() -> new AuthorizedException("invalid_credentials"));
 
         if (!passwordEncoder.matches(
-                request.getPassword(),
+                loginRequest.getPassword(),
                 user.getPassword()
         )) {
             throw new AuthorizedException("invalid_credentials");
@@ -136,10 +140,8 @@ public class AuthService {
 
         String profileImagePath = "/public/images/profile/default.jpg";
 
-        if (user.getProfileImageId() != null) {
-            profileImagePath = fileRepository.findById(user.getProfileImageId())
-                    .map(File::getFilePath)
-                    .orElse(profileImagePath);
+        if (user.getProfileImage() != null) {
+            profileImagePath = user.getProfileImage().getFilePath();
         }
 
         return AuthStatusResponse.of(
@@ -177,5 +179,15 @@ public class AuthService {
         if (userRepository.existsActiveByNickname(nickname)) {
             throw new DuplicateException("nickname_already_exists");
         }
+    }
+
+    // ========== Private Methods ==========
+    private File resolveProfileImage(String profileImagePath) {
+        if (profileImagePath == null || profileImagePath.isBlank()) {
+            return null;
+        }
+
+        return fileRepository.findByFilePath(profileImagePath)
+                .orElseThrow(() -> new NotFoundException("file_not_found"));
     }
 }

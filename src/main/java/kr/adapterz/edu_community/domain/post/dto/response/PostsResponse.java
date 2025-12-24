@@ -12,7 +12,13 @@ public class PostsResponse {
     private List<PostInfo> posts;  // 직접 리스트
     private PageInfo page;
 
-    public static PostsResponse of(List<PostInfo> posts, PageInfo page) {
-        return new PostsResponse(posts, page);
+    public static PostsResponse of(
+            List<PostInfo> posts,
+            PageInfo page
+    ) {
+        return new PostsResponse(
+                posts,
+                page
+        );
     }
 }

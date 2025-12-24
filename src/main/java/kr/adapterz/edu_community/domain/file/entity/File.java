@@ -12,12 +12,11 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "files")
 @NoArgsConstructor(access = PROTECTED)
 public class File extends BaseEntity {
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name="file_path", nullable = false)
-    private String filePath;
+    private String filePath = "/public/images/default.jpg";;
 
     @Column(name="file_category", nullable = false)
     @Enumerated(EnumType.STRING)

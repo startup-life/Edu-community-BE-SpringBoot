@@ -30,8 +30,7 @@ public class Comment extends BaseEntity {
     private Post post;
 
     // Constructor
-    public Comment(Long id, String content, User author, Post post) {
-        this.id = id;
+    public Comment(String content, User author, Post post) {
         this.content = content;
         this.author = author;
         this.post = post;

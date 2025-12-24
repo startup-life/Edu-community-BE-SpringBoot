@@ -5,10 +5,7 @@ import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.post.dto.internal.PostRelationData;
 import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.request.UpdatePostRequest;
-import kr.adapterz.edu_community.domain.post.dto.response.PageInfo;
-import kr.adapterz.edu_community.domain.post.dto.response.PostInfo;
-import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
-import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
+import kr.adapterz.edu_community.domain.post.dto.response.*;
 import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.post.repository.PostQueryRepository;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
@@ -25,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -72,48 +69,45 @@ public class PostService {
         // 작성자 조회
         User user = post.getAuthor();
 
-        // 프로필 이미지 경로 조회
-        String profileImagePath = DEFAULT_PROFILE_IMAGE_PATH;
-        if (user.getProfileImageId() != null) {
-            profileImagePath = fileRepository.findById(user.getProfileImageId())
-                    .map(File::getFilePath)
-                    .orElse(DEFAULT_PROFILE_IMAGE_PATH);
-        }
+        // 작성자 프로필 이미지 조회
+        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+                .map(File::getFilePath)
+                .orElse(DEFAULT_PROFILE_IMAGE_PATH);
 
         // 첨부 파일 조회
-        File attachFile = null;
-        if (post.getAttachFileId() != null) {
-            attachFile = fileRepository.findById(post.getAttachFileId())
-                    .orElse(null);
-        }
+        File attachFile = post.getAttachFile();
 
-        return PostResponse.from(post, user, profileImagePath, attachFile);
+        return PostResponse.of(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getLikeCount(),
+                post.getCommentCount(),
+                post.getHits(),
+                AuthorInfo.of(
+                        user.getId(),
+                        user.getNickname(),
+                        profileImagePath
+                ),
+                attachFile != null ? AttachFileInfo.of(attachFile.getId(), attachFile.getFilePath()) : null,
+                post.getCreatedAt()
+        );
     }
 
     // 게시글 작성
     public Long createPost(Long authorId, CreatePostRequest createPostRequest) {
+
         User author = userRepository.findActiveById(authorId)
-                .orElseThrow(() -> new NotFoundException("user_not_found" + authorId));
+                .orElseThrow(() -> new NotFoundException("user_not_found"));
 
-        Post post;
+        File attachFile = resolveAttachFile(createPostRequest.getAttachFilePath());
 
-        if (createPostRequest.getAttachFilePath() == null) {
-            post = Post.create(
-                    createPostRequest.getTitle(),
-                    createPostRequest.getContent(),
-                    author
-            );
-        } else {
-            File file = fileRepository.findByFilePath(createPostRequest.getAttachFilePath())
-                    .orElseThrow(() -> new NotFoundException("file_not_found"));
-
-            post = Post.createWithFile(
-                    createPostRequest.getTitle(),
-                    createPostRequest.getContent(),
-                    file.getId(),
-                    author
-            );
-        }
+        Post post = Post.create(
+                createPostRequest.getTitle(),
+                createPostRequest.getContent(),
+                author,
+                attachFile
+        );
 
         return postRepository.save(post).getId();
     }
@@ -123,15 +117,22 @@ public class PostService {
         Post post = postRepository.findActiveById(postId)
                 .orElseThrow(() -> new NotFoundException("post_not_found"));
 
-        Long fileId = resolvedFileId(updatePostRequest.getAttachFilePath());
+        File attachFile = resolveAttachFile(updatePostRequest.getAttachFilePath());
 
         post.update(
                 updatePostRequest.getTitle(),
                 updatePostRequest.getContent(),
-                fileId
+                attachFile
         );
 
         return post.getId();
+    }
+
+    // 게시글 삭제
+    public void deletePost(Long postId) {
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found"));
+        post.delete();
     }
 
     // ================================= 내부 메서드 =================================//
@@ -152,18 +153,7 @@ public class PostService {
         Map<Long, User> userMap = userRepository.findAllActiveByIds(authorIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
-        List<Long> fileIds = userMap.values().stream()
-                .map(User::getProfileImageId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-
-        Map<Long, File> fileMap = fileIds.isEmpty()
-                ? Map.of()
-                : fileRepository.findAllById(fileIds).stream()
-                .collect(Collectors.toMap(File::getId, Function.identity()));
-
-        return new PostRelationData(userMap, fileMap);
+        return new PostRelationData(userMap);
     }
 
     // Post와 관련된 데이터를 조합하여 PostInfo로 변환하는 메서드
@@ -174,32 +164,32 @@ public class PostService {
             throw new NotFoundException("user_not_found for id: " + post.getAuthor().getId());
         }
 
-        String profileImagePath = setProfileImagePath(user, data);
+        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+                .map(File::getFilePath)
+                .orElse(DEFAULT_PROFILE_IMAGE_PATH);
 
-        return PostInfo.from(post, user, profileImagePath);
+        return PostInfo.of(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getLikeCount(),
+                post.getCommentCount(),
+                post.getHits(),
+                AuthorInfo.of(
+                        user.getId(),
+                        user.getNickname(),
+                        profileImagePath
+                ),
+                post.getCreatedAt()
+        );
     }
 
-    // 프로필 이미지 경로 설정 메서드
-    private String setProfileImagePath(User user, PostRelationData data) {
-        String profileImagePath = DEFAULT_PROFILE_IMAGE_PATH;
-
-        if (user.getProfileImageId() != null) {
-            File file = data.getFileMap().get(user.getProfileImageId());
-            if(file != null) {
-                profileImagePath = file.getFilePath();
-            }
-        }
-
-        return profileImagePath;
-    }
-
-    private Long resolvedFileId(String attachFilePath) {
-        if (attachFilePath == null) {
+    private File resolveAttachFile(String attachFilePath) {
+        if (attachFilePath == null || attachFilePath.isBlank()) {
             return null;
         }
-
         return fileRepository.findByFilePath(attachFilePath)
-                .orElseThrow(() -> new NotFoundException("file_not_found"))
-                .getId();
+                .orElseThrow(() -> new NotFoundException("file_not_found"));
     }
+
 }
