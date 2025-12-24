@@ -30,6 +30,10 @@ public class Comment extends BaseEntity {
     private Post post;
 
     // Constructor
+    public Comment(String content) {
+        this.content = content;
+    }
+
     public Comment(String content, User author, Post post) {
         this.content = content;
         this.author = author;
@@ -46,4 +50,7 @@ public class Comment extends BaseEntity {
     }
 
     // Business Methods
+    public void update(String content) {
+        this.content = content;
+    }
 }

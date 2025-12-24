@@ -15,11 +15,13 @@ import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import kr.adapterz.edu_community.global.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CommentService {
 
@@ -32,6 +34,7 @@ public class CommentService {
     private final String DEFAULT_PROFILE_IMAGE_PATH = "/pubic/profile/default.jpg";
 
     // 특정 게시글의 댓글 조회
+    @Transactional(readOnly = true)
     public CommentsResponse getComments(Long postId) {
 
         List<Comment> comments =
@@ -59,6 +62,20 @@ public class CommentService {
         Comment comment = Comment.create(content, author, post);
         Comment savedComment = commentRepository.save(comment);
         return savedComment.getId();
+    }
+
+    // 댓글 수정
+    public void updateComment(
+            Long postId,
+            Long commentId,
+            Long userId,
+            String content
+    ) {
+        Comment comment = commentQueryRepository.findByIdAndPostIdAndAuthorId(
+                        commentId, postId, userId)
+                .orElseThrow(() -> new NotFoundException("comment_not_found"));
+
+        comment.update(content);
     }
 
     // ========== Private Methods ==========

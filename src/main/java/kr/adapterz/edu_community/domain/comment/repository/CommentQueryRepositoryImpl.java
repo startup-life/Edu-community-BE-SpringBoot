@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -26,5 +27,26 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
     """, Comment.class)
                 .setParameter("postId", postId)
                 .getResultList();
+    }
+
+    @Override
+    public Optional<Comment> findByIdAndPostIdAndAuthorId(
+            Long commentId,
+            Long postId,
+            Long authorId
+    ) {
+        return entityManager.createQuery("""
+        select c
+        from Comment c
+        where c.id = :commentId
+        and c.post.id = :postId
+        and c.author.id = :authorId
+        and c.deletedAt is null
+    """, Comment.class)
+                .setParameter("commentId", commentId)
+                .setParameter("postId", postId)
+                .setParameter("authorId", authorId)
+                .getResultStream()
+                .findFirst();
     }
 }

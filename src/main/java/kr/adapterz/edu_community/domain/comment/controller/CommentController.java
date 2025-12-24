@@ -1,6 +1,6 @@
 package kr.adapterz.edu_community.domain.comment.controller;
 
-import kr.adapterz.edu_community.domain.comment.dto.request.CreateCommentRequest;
+import kr.adapterz.edu_community.domain.comment.dto.request.CommentRequest;
 import kr.adapterz.edu_community.domain.comment.dto.response.CommentsResponse;
 import kr.adapterz.edu_community.domain.comment.service.CommentService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
@@ -34,7 +34,7 @@ public class CommentController {
     public ApiResponse<Long> createComment(
             @PathVariable("post_id") Long postId,
             @AuthenticationPrincipal Long userId,
-            @RequestBody CreateCommentRequest createCommentRequest
+            @RequestBody CommentRequest createCommentRequest
     ) {
         Long response = commentService.createComment(
                 postId,
@@ -46,6 +46,27 @@ public class CommentController {
                 HttpStatus.CREATED,
                 "create_comment_success",
                 response
+        );
+    }
+
+    // 댓글 수정
+    @PutMapping({"/{comment_id}"})
+    public ApiResponse<Void> updateComment(
+            @PathVariable("post_id") Long postId,
+            @PathVariable("comment_id") Long commentId,
+            @AuthenticationPrincipal Long userId,
+            @RequestBody CommentRequest updateCommentRequest
+    ) {
+        commentService.updateComment(
+                postId,
+                commentId,
+                userId,
+                updateCommentRequest.getContent()
+        );
+
+        return ApiResponse.ok(
+                "update_comment_success",
+                null
         );
     }
 }
