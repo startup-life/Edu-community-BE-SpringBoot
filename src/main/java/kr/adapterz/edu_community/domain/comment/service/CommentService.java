@@ -59,6 +59,9 @@ public class CommentService {
 
         Comment comment = Comment.create(content, author, post);
         Comment savedComment = commentRepository.save(comment);
+
+        increaseCommentCount(post);
+
         return savedComment.getId();
     }
 
@@ -81,9 +84,14 @@ public class CommentService {
             Long postId,
             Long commentId
     ) {
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found"));
+
         Comment comment = commentQueryRepository.findByIdAndPostId(
                         commentId, postId)
                 .orElseThrow(() -> new NotFoundException("comment_not_found"));
+
+        post.decreaseCommentCount();
 
         comment.delete();
     }
@@ -109,5 +117,9 @@ public class CommentService {
                 ),
                 comment.getCreatedAt()
         );
+    }
+
+    private void increaseCommentCount(Post post) {
+        post.increaseCommentCount();
     }
 }

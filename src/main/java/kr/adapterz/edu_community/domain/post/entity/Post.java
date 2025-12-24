@@ -95,4 +95,14 @@ public class Post extends BaseEntity {
     public void delete() {
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void increaseCommentCount() {
+        this.commentCount += 1;
+    }
+
+    public void decreaseCommentCount() {
+        if (this.commentCount > 0) {
+            this.commentCount -= 1;
+        }
+    }
 }
