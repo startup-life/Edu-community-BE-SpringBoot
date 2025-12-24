@@ -36,5 +36,14 @@ public class Comment extends BaseEntity {
         this.post = post;
     }
 
+    // Factory Method
+    public static Comment create(
+            String content,
+            User author,
+            Post post
+    ) {
+        return new Comment(content, author, post);
+    }
+
     // Business Methods
 }

@@ -1,13 +1,13 @@
 package kr.adapterz.edu_community.domain.comment.controller;
 
+import kr.adapterz.edu_community.domain.comment.dto.request.CreateCommentRequest;
 import kr.adapterz.edu_community.domain.comment.dto.response.CommentsResponse;
 import kr.adapterz.edu_community.domain.comment.service.CommentService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/posts/{post_id}/comments")
@@ -25,6 +25,26 @@ public class CommentController {
 
         return ApiResponse.ok(
                 "get_comments_success",
+                response
+        );
+    }
+
+    // 댓글 작성
+    @PostMapping()
+    public ApiResponse<Long> createComment(
+            @PathVariable("post_id") Long postId,
+            @AuthenticationPrincipal Long userId,
+            @RequestBody CreateCommentRequest createCommentRequest
+    ) {
+        Long response = commentService.createComment(
+                postId,
+                userId,
+                createCommentRequest.getContent()
+        );
+
+        return ApiResponse.of(
+                HttpStatus.CREATED,
+                "create_comment_success",
                 response
         );
     }
