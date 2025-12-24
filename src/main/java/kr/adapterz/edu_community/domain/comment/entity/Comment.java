@@ -53,4 +53,7 @@ public class Comment extends BaseEntity {
     public void update(String content) {
         this.content = content;
     }
+    public void delete() {
+        this.deletedAt = java.time.LocalDateTime.now();
+    }
 }

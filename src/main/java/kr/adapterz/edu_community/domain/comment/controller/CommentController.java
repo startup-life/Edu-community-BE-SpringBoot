@@ -69,4 +69,21 @@ public class CommentController {
                 null
         );
     }
+
+    // 댓글 삭제
+    @DeleteMapping({"/{comment_id}"})
+    public ApiResponse<Void> deleteComment(
+            @PathVariable("post_id") Long postId,
+            @PathVariable("comment_id") Long commentId
+    ) {
+        commentService.deleteComment(
+                postId,
+                commentId
+        );
+
+        return ApiResponse.ok(
+                "delete_comment_success",
+                null
+        );
+    }
 }

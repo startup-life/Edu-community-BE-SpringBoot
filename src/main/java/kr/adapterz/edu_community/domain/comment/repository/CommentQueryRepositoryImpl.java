@@ -49,4 +49,19 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
                 .getResultStream()
                 .findFirst();
     }
+
+    @Override
+    public Optional<Comment> findByIdAndPostId(Long commentId, Long postId) {
+        return entityManager.createQuery("""
+        select c
+        from Comment c
+        where c.id = :commentId
+        and c.post.id = :postId
+        and c.deletedAt is null
+    """, Comment.class)
+                .setParameter("commentId", commentId)
+                .setParameter("postId", postId)
+                .getResultStream()
+                .findFirst();
+    }
 }

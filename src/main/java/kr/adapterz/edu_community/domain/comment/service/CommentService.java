@@ -78,6 +78,18 @@ public class CommentService {
         comment.update(content);
     }
 
+    // 댓글 삭제
+    public void deleteComment(
+            Long postId,
+            Long commentId
+    ) {
+        Comment comment = commentQueryRepository.findByIdAndPostId(
+                        commentId, postId)
+                .orElseThrow(() -> new NotFoundException("comment_not_found"));
+
+        comment.delete();
+    }
+
     // ========== Private Methods ==========
 
     // Comment 엔티티를 CommentInfo DTO로 변환하는 메서드
