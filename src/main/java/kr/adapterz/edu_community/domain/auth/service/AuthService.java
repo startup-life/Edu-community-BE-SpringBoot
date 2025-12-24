@@ -40,8 +40,6 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final FileRepository fileRepository;
 
-    private final String DEFAULT_PROFILE_IMAGE_PATH = "/public/profile/default.jpg";
-
     // 회원가입
     public SignupResponse signup(SignupRequest signupRequest) {
         validateDuplicateEmail(signupRequest.getEmail());
@@ -138,8 +136,8 @@ public class AuthService {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
-        String profileImagePath = "/public/images/profile/default.jpg";
-
+        // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
+        String profileImagePath = null;
         if (user.getProfileImage() != null) {
             profileImagePath = user.getProfileImage().getFilePath();
         }

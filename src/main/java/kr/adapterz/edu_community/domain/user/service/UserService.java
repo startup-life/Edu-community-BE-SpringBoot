@@ -30,10 +30,10 @@ public class UserService {
         User user = userQueryRepository.findActiveByIdWithProfileImage(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
-        String DEFAULT_PROFILE_IMAGE_PATH = "/public/profile/default.jpg";
+        // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
         String profileImagePath = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
-                .orElse(DEFAULT_PROFILE_IMAGE_PATH);
+                .orElse(null);
 
         return UserInfoResponse.of(
                 user.getId(),
@@ -44,17 +44,22 @@ public class UserService {
         );
     }
 
-    //
+    // 인증 상태 확인
     @Transactional(readOnly = true)
     public AuthStatusResponse checkAuthStatus(Long userId) {
         User user = userQueryRepository.findActiveByIdWithProfileImage(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
+        // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
+        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+                .map(File::getFilePath)
+                .orElse(null);
+
         return AuthStatusResponse.of(
                 String.valueOf(user.getId()),
                 user.getEmail(),
                 user.getNickname(),
-                user.getProfileImage().getFilePath()
+                profileImagePath
         );
     }
 

@@ -92,4 +92,17 @@ public class PostController {
                 null
         );
     }
+
+    // 게시글 조회수 증가
+    @PostMapping("/{post_id}/views")
+    public ApiResponse<Void> increasePostViews(
+            @PathVariable("post_id") Long postId
+    ) {
+        postService.increasePostViews(postId);
+
+        return ApiResponse.ok(
+                "increase_post_views_success",
+                null
+        );
+    }
 }
