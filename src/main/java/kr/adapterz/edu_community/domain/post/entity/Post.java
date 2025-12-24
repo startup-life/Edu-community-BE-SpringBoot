@@ -105,4 +105,8 @@ public class Post extends BaseEntity {
             this.commentCount -= 1;
         }
     }
+
+    public void increaseHits() {
+        this.hits += 1;
+    }
 }

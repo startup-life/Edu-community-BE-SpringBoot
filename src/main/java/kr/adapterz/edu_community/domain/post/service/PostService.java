@@ -58,7 +58,6 @@ public class PostService {
     }
 
     // 게시글 상세 조회
-    @Transactional(readOnly = true)
     public PostResponse getPost(Long postId) {
         // 게시글 조회
         Post post = postQueryRepository.findByIdWithAuthor(postId)
@@ -131,6 +130,13 @@ public class PostService {
         Post post = postRepository.findActiveById(postId)
                 .orElseThrow(() -> new NotFoundException("post_not_found"));
         post.delete();
+    }
+
+    // 게시글 조회수 증가
+    public void increasePostViews(Long postId) {
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found"));
+        post.increaseHits();
     }
 
     // ================================= 내부 메서드 =================================//
