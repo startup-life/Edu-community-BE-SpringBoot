@@ -31,8 +31,6 @@ public class CommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    private final String DEFAULT_PROFILE_IMAGE_PATH = "/pubic/profile/default.jpg";
-
     // 특정 게시글의 댓글 조회
     @Transactional(readOnly = true)
     public CommentsResponse getComments(Long postId) {
@@ -96,9 +94,10 @@ public class CommentService {
     private CommentInfo toCommentInfo(Comment comment) {
         User user = comment.getAuthor();
 
+        // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
         String profileImagePath = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
-                .orElse(DEFAULT_PROFILE_IMAGE_PATH);
+                .orElse(null);
 
         return CommentInfo.of(
                 comment.getId(),

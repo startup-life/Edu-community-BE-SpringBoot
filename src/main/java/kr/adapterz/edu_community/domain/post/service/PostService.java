@@ -36,8 +36,6 @@ public class PostService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
 
-    private final String DEFAULT_PROFILE_IMAGE_PATH = "/public/images/profile/default.jpg";
-
     // 개사굴 목록 조회
     @Transactional(readOnly = true)
     public PostsResponse getPosts(int page, int size, String sortBy, String direction) {
@@ -69,10 +67,10 @@ public class PostService {
         // 작성자 조회
         User user = post.getAuthor();
 
-        // 작성자 프로필 이미지 조회
+        // 작성자 프로필 이미지 조회 (null이면 프론트엔드에서 기본 이미지 사용)
         String profileImagePath = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
-                .orElse(DEFAULT_PROFILE_IMAGE_PATH);
+                .orElse(null);
 
         // 첨부 파일 조회
         File attachFile = post.getAttachFile();
@@ -164,9 +162,10 @@ public class PostService {
             throw new NotFoundException("user_not_found for id: " + post.getAuthor().getId());
         }
 
+        // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
         String profileImagePath = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
-                .orElse(DEFAULT_PROFILE_IMAGE_PATH);
+                .orElse(null);
 
         return PostInfo.of(
                 post.getId(),
