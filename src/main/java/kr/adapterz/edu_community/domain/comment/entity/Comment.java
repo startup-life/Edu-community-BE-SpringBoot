@@ -30,11 +30,30 @@ public class Comment extends BaseEntity {
     private Post post;
 
     // Constructor
+    public Comment(String content) {
+        this.content = content;
+    }
+
     public Comment(String content, User author, Post post) {
         this.content = content;
         this.author = author;
         this.post = post;
     }
 
+    // Factory Method
+    public static Comment create(
+            String content,
+            User author,
+            Post post
+    ) {
+        return new Comment(content, author, post);
+    }
+
     // Business Methods
+    public void update(String content) {
+        this.content = content;
+    }
+    public void delete() {
+        this.deletedAt = java.time.LocalDateTime.now();
+    }
 }
