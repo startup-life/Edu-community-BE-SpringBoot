@@ -20,7 +20,6 @@ public class UserQueryRepositoryImpl implements UserQueryRepository {
             from User u
             left join fetch u.profileImage
             where u.email = :email
-            and u.deletedAt is null
         """, User.class)
                 .setParameter("email", email)
                 .getResultStream()
@@ -34,10 +33,10 @@ public class UserQueryRepositoryImpl implements UserQueryRepository {
             from User u
             left join fetch u.profileImage
             where u.id = :id
-            and u.deletedAt is null
         """, User.class)
                 .setParameter("id", id)
                 .getResultStream()
                 .findFirst();
     }
 }
+
