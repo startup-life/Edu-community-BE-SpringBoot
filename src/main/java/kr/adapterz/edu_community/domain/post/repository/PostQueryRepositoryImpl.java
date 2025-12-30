@@ -16,14 +16,13 @@ public class PostQueryRepositoryImpl implements PostQueryRepository {
     @Override
     public Optional<Post> findByIdWithAuthor(Long postId) {
         return entityManager.createQuery("""
-        select p
-        from Post p
-        join fetch p.author u
-        left join fetch u.profileImage
-        left join fetch p.attachFile
-        where p.id = :postId
-        and p.deletedAt is null
-    """, Post.class)
+            select p
+            from Post p
+            join fetch p.author u
+            left join fetch u.profileImage
+            left join fetch p.attachFile
+            where p.id = :postId
+        """, Post.class)
                 .setParameter("postId", postId)
                 .getResultStream()
                 .findFirst();

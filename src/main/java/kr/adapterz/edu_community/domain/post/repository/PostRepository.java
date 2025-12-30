@@ -12,10 +12,17 @@ import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query("select p from Post p where p.id = :postId and p.deletedAt is null")
+    @Query("""
+        select p
+        from Post p
+        where p.id = :postId
+    """)
     @NonNull
     Optional<Post> findActiveById(@Param("postId") @NonNull Long postId);
 
-    @Query("select p from Post p where p.deletedAt is null")
+    @Query("""
+        select p
+        from Post p
+    """)
     Page<Post> findPage(Pageable pageable);
 }

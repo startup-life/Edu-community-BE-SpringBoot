@@ -17,14 +17,13 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
     @Override
     public List<Comment> findAllByPostIdWithAuthor(Long postId) {
         return entityManager.createQuery("""
-        select c
-        from Comment c
-        join fetch c.author u
-        left join fetch u.profileImage
-        where c.post.id = :postId
-        and c.deletedAt is null
-        order by c.createdAt asc
-    """, Comment.class)
+            select c
+            from Comment c
+            join fetch c.author u
+            left join fetch u.profileImage
+            where c.post.id = :postId
+            order by c.createdAt asc
+        """, Comment.class)
                 .setParameter("postId", postId)
                 .getResultList();
     }
@@ -36,13 +35,12 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
             Long authorId
     ) {
         return entityManager.createQuery("""
-        select c
-        from Comment c
-        where c.id = :commentId
-        and c.post.id = :postId
-        and c.author.id = :authorId
-        and c.deletedAt is null
-    """, Comment.class)
+            select c
+            from Comment c
+            where c.id = :commentId
+            and c.post.id = :postId
+            and c.author.id = :authorId
+        """, Comment.class)
                 .setParameter("commentId", commentId)
                 .setParameter("postId", postId)
                 .setParameter("authorId", authorId)
@@ -53,12 +51,11 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
     @Override
     public Optional<Comment> findByIdAndPostId(Long commentId, Long postId) {
         return entityManager.createQuery("""
-        select c
-        from Comment c
-        where c.id = :commentId
-        and c.post.id = :postId
-        and c.deletedAt is null
-    """, Comment.class)
+            select c
+            from Comment c
+            where c.id = :commentId
+            and c.post.id = :postId
+        """, Comment.class)
                 .setParameter("commentId", commentId)
                 .setParameter("postId", postId)
                 .getResultStream()

@@ -6,17 +6,19 @@ import kr.adapterz.edu_community.global.common.entity.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name="users")
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted_at is null")
 public class User extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column()
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 100)
@@ -32,7 +34,6 @@ public class User extends BaseEntity {
     @JoinColumn(name = "file_id")
     private File profileImage;
 
-    // Constructor
     public User(String email, String password, String nickname, File profileImage) {
         this.email = email;
         this.password = password;
@@ -40,7 +41,6 @@ public class User extends BaseEntity {
         this.profileImage = profileImage;
     }
 
-    // Business Methods
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
@@ -49,11 +49,11 @@ public class User extends BaseEntity {
         this.password = password;
     }
 
-    public void updateProfileImage(File profileImage) { this.profileImage = profileImage; }
+    public void updateProfileImage(File profileImage) {
+        this.profileImage = profileImage;
+    }
 
     public void withdraw() {
         this.deletedAt = LocalDateTime.now();
     }
-
-
 }
