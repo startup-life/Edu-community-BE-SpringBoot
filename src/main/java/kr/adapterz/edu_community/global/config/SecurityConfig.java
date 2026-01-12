@@ -56,8 +56,7 @@ public class SecurityConfig {
                             response.setCharacterEncoding("UTF-8");
 
                             ApiResponse<Void> apiResponse = ApiResponse.of(
-                                    HttpStatus.UNAUTHORIZED,
-                                    "required_authorization",
+                                    "UNAUTHORIZED",
                                     null
                             );
 
@@ -71,8 +70,7 @@ public class SecurityConfig {
                             response.setCharacterEncoding("UTF-8");
 
                             ApiResponse<Void> apiResponse = ApiResponse.of(
-                                    HttpStatus.FORBIDDEN,
-                                    "no_permission",
+                                    "FORBIDDEN",
                                     null
                             );
 

@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @Builder
@@ -13,17 +12,16 @@ import org.springframework.http.HttpStatus;
 @JsonPropertyOrder({"status", "message", "data"})
 public class ApiResponse<T> {
 
-    private final int status;
-    private final String message;
+    private final String code;
     private final T data;
 
     // 범용 생성 메서드
-    public static <T> ApiResponse<T> of(HttpStatus status, String message, T data) {
-        return new ApiResponse<>(status.value(), message, data);
+    public static <T> ApiResponse<T> of(String code, T data) {
+        return new ApiResponse<>(code, data);
     }
 
     // 편의 메서드들
-    public static <T> ApiResponse<T> ok(String message, T data) {
-        return of(HttpStatus.OK, message, data);
+    public static <T> ApiResponse<T> ok(String code, T data) {
+        return of(code, data);
     }
 }
