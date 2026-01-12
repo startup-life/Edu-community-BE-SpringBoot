@@ -23,3 +23,42 @@ jwt:
   secret: 3W8i2bTUFAf+rQtb6SV01OHnNEpqlntH/wfO770lw/gm3n2onNxHNNtbik6mNux7aNlMD0jsZHzdE2mYZe8vlA== # openssl rand -base64 64
   access-token-exp-seconds: 300      # 5 minutes
   refresh-token-exp-seconds: 12096000
+
+bucket4j:
+  enabled: true
+  filters:
+    # 회원가입 - 10초에 3회
+    - cache-name: signup-bucket
+      url: /api/auth/signup
+      strategy: first
+      http-response-body: '{"code": "TOO_MANY_REQUESTS", "data": null}'
+      rate-limits:
+        - cache-key: getRemoteAddr()
+          bandwidths:
+            - capacity: 10
+              time: 10
+              unit: seconds
+
+    # 로그인 - 1분에 5회
+    - cache-name: login-bucket
+      url: /api/auth/login
+      strategy: first
+      http-response-body: '{"code": "TOO_MANY_REQUESTS", "data": null}'
+      rate-limits:
+        - cache-key: getRemoteAddr()
+          bandwidths:
+            - capacity: 50
+              time: 1
+              unit: minutes
+
+    # 일반 API - 1분에 100회
+    - cache-name: general-bucket
+      url: /api/.*
+      strategy: first
+      http-response-body: '{"code": "RATE_LIMIT_EXCEEDED", "data": null}'
+      rate-limits:
+        - cache-key: getRemoteAddr()
+          bandwidths:
+            - capacity: 100
+              time: 1
+              unit: minutes
