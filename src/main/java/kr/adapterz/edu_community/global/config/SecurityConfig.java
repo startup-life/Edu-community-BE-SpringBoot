@@ -31,12 +31,12 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/v1/auth/login",
-            "/api/v1/auth/signup",
-            "/api/v1/auth/token/refresh",
-            "/api/v1/auth/email/availability",
-            "/api/v1/auth/nickname/availability",
-            "/api/v1/users/me/profile-image",
+            "/v1/auth/login",
+            "/v1/auth/signup",
+            "/v1/auth/token/refresh",
+            "/v1/auth/email/availability",
+            "/v1/auth/nickname/availability",
+            "/v1/users/me/profile-image",
             "/public/**"
     };
 

@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@JsonPropertyOrder({"status", "message", "data"})
+@JsonPropertyOrder({"code", "data"})
 public class ApiResponse<T> {
 
     private final String code;

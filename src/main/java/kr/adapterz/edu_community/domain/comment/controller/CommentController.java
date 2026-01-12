@@ -6,11 +6,12 @@ import kr.adapterz.edu_community.domain.comment.service.CommentService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/posts/{post_id}/comments")
+@RequestMapping("/v1/posts/{post_id}/comments")
 @RequiredArgsConstructor
 public class CommentController {
 
@@ -18,20 +19,19 @@ public class CommentController {
 
     // 특정 게시글의 댓글 조회
     @GetMapping()
-    public ApiResponse<CommentsResponse> getComments(
+    public ResponseEntity<ApiResponse<CommentsResponse>> getComments(
             @PathVariable("post_id") Long postId
     ) {
         CommentsResponse response = commentService.getComments(postId);
 
-        return ApiResponse.ok(
-                "get_comments_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("COMMENTS_RETRIEVED", response));
     }
 
     // 댓글 작성
     @PostMapping()
-    public ApiResponse<Long> createComment(
+    public ResponseEntity<ApiResponse<Long>> createComment(
             @PathVariable("post_id") Long postId,
             @AuthenticationPrincipal Long userId,
             @RequestBody CommentRequest createCommentRequest
@@ -42,16 +42,14 @@ public class CommentController {
                 createCommentRequest.getContent()
         );
 
-        return ApiResponse.of(
-                HttpStatus.CREATED,
-                "create_comment_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of("COMMENT_CREATED", null));
     }
 
     // 댓글 수정
     @PutMapping({"/{comment_id}"})
-    public ApiResponse<Void> updateComment(
+    public ResponseEntity<ApiResponse<Void>> updateComment(
             @PathVariable("post_id") Long postId,
             @PathVariable("comment_id") Long commentId,
             @AuthenticationPrincipal Long userId,
@@ -64,15 +62,14 @@ public class CommentController {
                 updateCommentRequest.getContent()
         );
 
-        return ApiResponse.ok(
-                "update_comment_success",
-                null
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("COMMENT_UPDATED", null));
     }
 
     // 댓글 삭제
     @DeleteMapping({"/{comment_id}"})
-    public ApiResponse<Void> deleteComment(
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
             @PathVariable("post_id") Long postId,
             @PathVariable("comment_id") Long commentId
     ) {
@@ -81,9 +78,8 @@ public class CommentController {
                 commentId
         );
 
-        return ApiResponse.ok(
-                "delete_comment_success",
-                null
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("COMMENT_DELETED", null));
     }
 }
