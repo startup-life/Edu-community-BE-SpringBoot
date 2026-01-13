@@ -4,11 +4,15 @@ import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +31,29 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(exception.getStatus())
                 .body(ApiResponse.of(exception.getCode(), null));
+    }
+
+    /**
+     * [400] Bad Request 통합 처리
+     * 1. HttpMessageNotReadableException: JSON 문법 오류, Body 누락, 파싱 실패
+     * 2. MethodArgumentTypeMismatchException: 타입 불일치 (Long 자리에 String 등)
+     * 3. MissingServletRequestParameterException: 필수 파라미터 누락
+     * 4. ServletRequestBindingException: 그 외 바인딩 예외
+     */
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class,
+            ServletRequestBindingException.class
+    })
+    public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception exception) {
+
+        // 디버깅을 위해 서버 로그에는 상세 원인을 남겨두는 것이 좋습니다.
+        log.warn("Bad Request: {}", exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.of("BAD_REQUEST", null));
     }
 
     // 405 Method Not Allowed

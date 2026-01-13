@@ -45,7 +45,7 @@ public class AuthService {
         validateDuplicateEmail(signupRequest.getEmail());
         validateDuplicateNickname(signupRequest.getNickname());
 
-        File profileImage = resolveProfileImage(signupRequest.getProfileImagePath());
+        File profileImage = resolveProfileImage(signupRequest.getProfileImageUrl());
 
         User user = new User(
                 signupRequest.getEmail(),
@@ -137,16 +137,16 @@ public class AuthService {
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImagePath = null;
+        String profileImageUrl = null;
         if (user.getProfileImage() != null) {
-            profileImagePath = user.getProfileImage().getFilePath();
+            profileImageUrl = user.getProfileImage().getFilePath();
         }
 
         return AuthStatusResponse.of(
                 String.valueOf(user.getId()),
                 user.getEmail(),
                 user.getNickname(),
-                profileImagePath
+                profileImageUrl
         );
     }
 
@@ -180,12 +180,12 @@ public class AuthService {
     }
 
     // ========== Private Methods ==========
-    private File resolveProfileImage(String profileImagePath) {
-        if (profileImagePath == null || profileImagePath.isBlank()) {
+    private File resolveProfileImage(String profileImageUrl) {
+        if (profileImageUrl == null || profileImageUrl.isBlank()) {
             return null;
         }
 
-        return fileRepository.findByFilePath(profileImagePath)
+        return fileRepository.findByFilePath(profileImageUrl)
                 .orElseThrow(() -> new NotFoundException("file_not_found"));
     }
 }
