@@ -164,6 +164,11 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    // 로그아웃
+    public void logout(Long userId) {
+        refreshTokenRepository.deleteByUserId(userId);
+    }
+
     // 중복 이메일 검사
     @Transactional(readOnly = true)
     public void validateDuplicateEmail(String email) {

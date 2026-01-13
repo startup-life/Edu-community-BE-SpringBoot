@@ -121,6 +121,31 @@ public class AuthController {
                 .body(ApiResponse.of("USER_PASSWORD_UPDATED", null));
     }
 
+    // 로그아웃
+    @DeleteMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @AuthenticationPrincipal Long userId,
+            @CookieValue(name = "refreshToken", required = false) String refreshToken
+    ) {
+        if (refreshToken != null) {
+            authService.logout(userId);
+        }
+
+        // 쿠키 삭제 (Max-Age = 0)
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .path("/")
+                .httpOnly(true)
+                .secure(false) // 운영환경에선 true
+                .sameSite("Strict")
+                .maxAge(0) // [핵심] 즉시 만료
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(ApiResponse.of("LOGOUT_SUCCESS", null));
+    }
+
     // 중복 이메일 검사
     @GetMapping("/email/availability")
     public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(
