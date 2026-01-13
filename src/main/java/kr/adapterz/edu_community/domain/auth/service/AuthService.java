@@ -64,13 +64,13 @@ public class AuthService {
     // 로그인
     public LoginResult login(LoginRequest loginRequest) {
         User user = userQueryRepository.findActiveByEmailWithProfileImage(loginRequest.getEmail())
-                .orElseThrow(() -> new AuthorizedException("invalid_credentials"));
+                .orElseThrow(() -> new AuthorizedException("INVALID_CREDENTIALS"));
 
         if (!passwordEncoder.matches(
                 loginRequest.getPassword(),
                 user.getPassword()
         )) {
-            throw new AuthorizedException("invalid_credentials");
+            throw new AuthorizedException("INVALID_CREDENTIALS");
         }
 
         String accessToken = jwtProvider.createAccessToken(

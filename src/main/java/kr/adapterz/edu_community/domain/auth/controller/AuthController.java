@@ -2,23 +2,34 @@ package kr.adapterz.edu_community.domain.auth.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import kr.adapterz.edu_community.domain.auth.dto.internal.LoginResult;
 import kr.adapterz.edu_community.domain.auth.dto.internal.TokenResult;
 import kr.adapterz.edu_community.domain.auth.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.LoginRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.SignupRequest;
+import kr.adapterz.edu_community.domain.auth.dto.response.AuthStatusResponse;
+import kr.adapterz.edu_community.domain.auth.dto.response.LoginResponse;
 import kr.adapterz.edu_community.domain.auth.dto.response.SignupResponse;
-import kr.adapterz.edu_community.domain.auth.dto.response.*;
+import kr.adapterz.edu_community.domain.auth.dto.response.TokenInfo;
 import kr.adapterz.edu_community.domain.auth.service.AuthService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/auth")
 @RequiredArgsConstructor
+@Validated
 public class AuthController {
 
     private final AuthService authService;
@@ -113,7 +124,10 @@ public class AuthController {
     // 중복 이메일 검사
     @GetMapping("/email/availability")
     public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(
-        @RequestParam(value="email") String email
+            @RequestParam(value="email")
+            @NotBlank(message="REQUIRED")
+            @Email(message="INVALID_FORMAT")
+            String email
     ) {
         System.out.println(email);
         authService.validateDuplicateEmail(email);
@@ -126,7 +140,15 @@ public class AuthController {
     // 중복 닉네임 검사
     @GetMapping("/nickname/availability")
     public ResponseEntity<ApiResponse<Void>> checkNicknameAvailability(
-        @RequestParam(value="nickname") String nickname
+        @RequestParam(value="nickname")
+        @NotBlank(message="REQUIRED")
+        @Size(min=2, message="TOO_SHORT")
+        @Size(max=10, message="TOO_LONG")
+        @Pattern(
+                regexp = "^[가-힣a-zA-Z0-9]+$",
+                message = "INVALID_FORMAT"
+        ) // 한글, 영문, 숫자만 가능
+        String nickname
     ) {
         authService.validateDuplicateNickname(nickname);
 
