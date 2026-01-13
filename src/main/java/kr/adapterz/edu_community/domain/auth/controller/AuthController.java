@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import kr.adapterz.edu_community.domain.auth.dto.internal.LoginResult;
 import kr.adapterz.edu_community.domain.auth.dto.internal.TokenResult;
-import kr.adapterz.edu_community.domain.auth.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.LoginRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.SignupRequest;
 import kr.adapterz.edu_community.domain.auth.dto.response.AuthStatusResponse;
@@ -106,19 +105,6 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.of("AUTH_CHECK_SUCCESS", response));
-    }
-
-    // 비밀번호 변경
-    @PatchMapping("/password")
-    public ResponseEntity<ApiResponse<Void>> changePassword(
-            @AuthenticationPrincipal Long userId,
-            @Valid @RequestBody ChangePasswordRequest changePasswordRequest
-    ) {
-        authService.changePassword(userId, changePasswordRequest);
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.of("USER_PASSWORD_UPDATED", null));
     }
 
     // 로그아웃

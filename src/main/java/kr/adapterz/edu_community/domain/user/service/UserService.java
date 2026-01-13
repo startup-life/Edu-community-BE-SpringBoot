@@ -1,7 +1,9 @@
 package kr.adapterz.edu_community.domain.user.service;
 
+import kr.adapterz.edu_community.domain.auth.repository.RefreshTokenRepository;
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
+import kr.adapterz.edu_community.domain.user.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.user.dto.request.UpdateUserRequest;
 import kr.adapterz.edu_community.domain.user.dto.response.UserInfoResponse;
 import kr.adapterz.edu_community.domain.user.entity.User;
@@ -10,8 +12,10 @@ import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import kr.adapterz.edu_community.global.exception.NotFoundException;
 import kr.adapterz.edu_community.global.util.FileUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Optional;
 
@@ -23,6 +27,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserQueryRepository userQueryRepository;
     private final FileRepository fileRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // 유저 정보 가져오기
     @Transactional(readOnly = true)
@@ -61,13 +67,27 @@ public class UserService {
         applyProfileImage(user, updateUserRequest.getProfileImageUrl());
     }
 
+    // 비밀번호 변경
+    public void changePassword(
+            Long userId,
+            @RequestBody ChangePasswordRequest changePasswordRequest
+    ) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+
+        String newPassword = passwordEncoder.encode(changePasswordRequest.getPassword());
+        user.updatePassword(newPassword);
+        userRepository.save(user);
+    }
+
     // 회원 탈퇴
     public void withdrawUser(Long userId) {
     User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
 
         user.withdraw();
         userRepository.save(user);
+        refreshTokenRepository.deleteByUserId(userId);
     }
 
     // ========== Private Methods ==========
@@ -80,7 +100,7 @@ public class UserService {
             return;
         }
 
-        // [핵심] 프론트에서 온 전체 URL(http://...)을 DB용 상대 경로(/public/...)로 변환
+        // 프론트에서 온 전체 URL(http://...)을 DB용 상대 경로(/public/...)로 변환
         String relativePath = FileUtil.extractPathFromUrl(requestedPath);
 
         // 2. 현재 경로와 비교 (불필요한 갱신 방지)

@@ -2,7 +2,6 @@ package kr.adapterz.edu_community.domain.auth.service;
 
 import kr.adapterz.edu_community.domain.auth.dto.internal.LoginResult;
 import kr.adapterz.edu_community.domain.auth.dto.internal.TokenResult;
-import kr.adapterz.edu_community.domain.auth.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.LoginRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.SignupRequest;
 import kr.adapterz.edu_community.domain.auth.dto.response.AuthStatusResponse;
@@ -16,15 +15,14 @@ import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserQueryRepository;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
+import kr.adapterz.edu_community.global.auth.JwtProvider;
 import kr.adapterz.edu_community.global.exception.AuthorizedException;
 import kr.adapterz.edu_community.global.exception.DuplicateException;
 import kr.adapterz.edu_community.global.exception.NotFoundException;
-import kr.adapterz.edu_community.global.auth.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -149,19 +147,6 @@ public class AuthService {
                 user.getNickname(),
                 profileImageUrl
         );
-    }
-
-    // 비밀번호 변경
-    public void changePassword(
-            Long userId,
-            @RequestBody ChangePasswordRequest changePasswordRequest
-    ) {
-        User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
-
-        String newPassword = passwordEncoder.encode(changePasswordRequest.getPassword());
-        user.updatePassword(newPassword);
-        userRepository.save(user);
     }
 
     // 로그아웃
