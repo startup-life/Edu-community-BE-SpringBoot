@@ -16,7 +16,7 @@ import kr.adapterz.edu_community.domain.auth.dto.response.LoginResponse;
 import kr.adapterz.edu_community.domain.auth.dto.response.SignupResponse;
 import kr.adapterz.edu_community.domain.auth.dto.response.TokenInfo;
 import kr.adapterz.edu_community.domain.auth.service.AuthService;
-import kr.adapterz.edu_community.global.common.response.ApiResponse;
+import kr.adapterz.edu_community.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

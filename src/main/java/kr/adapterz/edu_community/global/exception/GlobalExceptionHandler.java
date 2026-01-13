@@ -1,8 +1,8 @@
-package kr.adapterz.edu_community.global.common.exception;
+package kr.adapterz.edu_community.global.exception;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import kr.adapterz.edu_community.global.common.response.ApiResponse;
+import kr.adapterz.edu_community.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

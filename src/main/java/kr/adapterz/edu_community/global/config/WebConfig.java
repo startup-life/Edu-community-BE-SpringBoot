@@ -1,6 +1,6 @@
 package kr.adapterz.edu_community.global.config;
 
-import kr.adapterz.edu_community.global.common.interceptor.RateLimitInterceptor;
+import kr.adapterz.edu_community.global.interceptor.RateLimitInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;

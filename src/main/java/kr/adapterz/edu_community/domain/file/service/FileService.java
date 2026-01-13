@@ -2,7 +2,7 @@ package kr.adapterz.edu_community.domain.file.service;
 
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
-import kr.adapterz.edu_community.global.common.exception.BadRequestException;
+import kr.adapterz.edu_community.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.stereotype.Service;

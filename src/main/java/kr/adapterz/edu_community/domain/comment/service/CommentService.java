@@ -12,7 +12,7 @@ import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
-import kr.adapterz.edu_community.global.common.exception.NotFoundException;
+import kr.adapterz.edu_community.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

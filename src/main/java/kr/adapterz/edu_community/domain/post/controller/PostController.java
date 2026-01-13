@@ -5,7 +5,7 @@ import kr.adapterz.edu_community.domain.post.dto.request.UpdatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.service.PostService;
-import kr.adapterz.edu_community.global.common.response.ApiResponse;
+import kr.adapterz.edu_community.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

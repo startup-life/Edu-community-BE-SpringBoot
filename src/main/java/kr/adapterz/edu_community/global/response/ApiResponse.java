@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.global.common.response;
+package kr.adapterz.edu_community.global.response;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AccessLevel;

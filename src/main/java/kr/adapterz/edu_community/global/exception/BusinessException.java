@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.global.common.exception;
+package kr.adapterz.edu_community.global.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

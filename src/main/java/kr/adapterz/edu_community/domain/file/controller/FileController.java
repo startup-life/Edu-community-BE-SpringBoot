@@ -3,7 +3,7 @@ package kr.adapterz.edu_community.domain.file.controller;
 import kr.adapterz.edu_community.domain.file.dto.FileUploadResponse;
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.service.FileService;
-import kr.adapterz.edu_community.global.common.response.ApiResponse;
+import kr.adapterz.edu_community.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.http.HttpStatus;

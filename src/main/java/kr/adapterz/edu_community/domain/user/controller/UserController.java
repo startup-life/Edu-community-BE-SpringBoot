@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import kr.adapterz.edu_community.domain.user.dto.request.UpdateUserRequest;
 import kr.adapterz.edu_community.domain.user.dto.response.UserInfoResponse;
 import kr.adapterz.edu_community.domain.user.service.UserService;
-import kr.adapterz.edu_community.global.common.response.ApiResponse;
+import kr.adapterz.edu_community.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

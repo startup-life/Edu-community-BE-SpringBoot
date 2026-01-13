@@ -2,7 +2,7 @@ package kr.adapterz.edu_community.domain.user.entity;
 
 import jakarta.persistence.*;
 import kr.adapterz.edu_community.domain.file.entity.File;
-import kr.adapterz.edu_community.global.common.entity.BaseEntity;
+import kr.adapterz.edu_community.global.entity.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -11,7 +11,7 @@ import kr.adapterz.edu_community.domain.post.repository.PostQueryRepository;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
-import kr.adapterz.edu_community.global.common.exception.NotFoundException;
+import kr.adapterz.edu_community.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
