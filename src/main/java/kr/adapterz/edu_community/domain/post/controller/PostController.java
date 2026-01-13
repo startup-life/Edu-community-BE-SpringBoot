@@ -8,11 +8,12 @@ import kr.adapterz.edu_community.domain.post.service.PostService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/v1/posts")
 @RequiredArgsConstructor
 public class PostController {
 
@@ -20,7 +21,7 @@ public class PostController {
 
     // 개사굴 목록 조회
     @GetMapping()
-    public ApiResponse<PostsResponse> getPosts(
+    public ResponseEntity<ApiResponse<PostsResponse>> getPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -28,81 +29,70 @@ public class PostController {
     ) {
         PostsResponse response = postService.getPosts(page, size, sortBy, direction);
 
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "get_posts_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("POSTS_RETRIEVED", response));
     }
 
     // 개사굴 단일 조회
     @GetMapping("/{post_id}")
-    public ApiResponse<PostResponse> getPost(
+    public ResponseEntity<ApiResponse<PostResponse>> getPost(
             @PathVariable("post_id") Long postId
     ) {
         PostResponse response = postService.getPost(postId);
 
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "get_post_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("POST_RETRIEVED", response));
     }
 
     // 게시글 작성
     @PostMapping()
-    public ApiResponse<Long> createPost(
+    public ResponseEntity<ApiResponse<Long>> createPost(
             @AuthenticationPrincipal Long userId,
             @RequestBody CreatePostRequest createPostRequest
     ) {
         Long response = postService.createPost(userId, createPostRequest);
 
-        return ApiResponse.of(
-                HttpStatus.CREATED,
-                "create_post_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of("POST_CREATED", response));
     }
 
     // 게시글 수정
     @PutMapping("/{post_id}")
-    public ApiResponse<Long> updatePost(
+    public ResponseEntity<ApiResponse<Long>> updatePost(
             @PathVariable("post_id") Long postId,
             @RequestBody UpdatePostRequest updatePostRequest
     ) {
         Long response = postService.updatePost(postId, updatePostRequest);
 
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "update_post_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("POST_UPDATED", response));
     }
 
     // 게시글 삭제
     @DeleteMapping("/{post_id}")
-    public ApiResponse<Void> deletePost(
+    public ResponseEntity<ApiResponse<Void>> deletePost(
         @PathVariable("post_id")  Long postId
     ) {
         postService.deletePost(postId);
 
-        return ApiResponse.of(
-                HttpStatus.NO_CONTENT,
-                "delete_post_success",
-                null
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("POST_DELETED", null));
     }
 
     // 게시글 조회수 증가
     @PostMapping("/{post_id}/views")
-    public ApiResponse<Void> increasePostViews(
+    public ResponseEntity<ApiResponse<Void>> increasePostViews(
             @PathVariable("post_id") Long postId
     ) {
         postService.increasePostViews(postId);
 
-        return ApiResponse.ok(
-                "increase_post_views_success",
-                null
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("POST_VIEW_INCREASED", null));
     }
 }

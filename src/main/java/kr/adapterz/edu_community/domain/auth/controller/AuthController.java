@@ -17,7 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -25,20 +25,18 @@ public class AuthController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ApiResponse<SignupResponse> signup(
+    public ResponseEntity<ApiResponse<SignupResponse>> signup(
             @Valid @RequestBody SignupRequest signupRequest
     ) {
         SignupResponse response = authService.signup(signupRequest);
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "register_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of("SIGNUP_SUCCESS", response));
     }
 
     // 로그인
     @PostMapping("/login")
-    public ApiResponse<LoginResponse> login(
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginRequest loginRequest,
             HttpServletResponse httpResponse
     ) {
@@ -57,17 +55,14 @@ public class AuthController {
         // 쿠키를 응답 헤더에 추가
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "login_success",
-                result.getResponse()
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("LOGIN_SUCCESS", result.getResponse()));
     }
 
     // 액세스 토큰 재발급
     @PostMapping("/token/refresh")
-        // Refresh Token을 HttpOnly 쿠키로 설정
-    public ApiResponse<TokenInfo> refreshAccessToken(
+    public ResponseEntity<ApiResponse<TokenInfo>> refreshAccessToken(
             @CookieValue(name = "refreshToken", required = false) String refreshToken,
             HttpServletResponse httpResponse
     ) {
@@ -85,66 +80,58 @@ public class AuthController {
             httpResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         }
 
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "token_refreshed",
-                result.getToken()
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("TOKEN_REFRESH_SUCCESS", result.getToken()));
     }
 
     // 로그인 상태 검증
     @GetMapping("/me")
-    public ApiResponse<AuthStatusResponse> checkAuthStatus(
+    public ResponseEntity<ApiResponse<AuthStatusResponse>> checkAuthStatus(
             @AuthenticationPrincipal Long userId
     ) {
         AuthStatusResponse response = authService.checkAuthStatus(userId);
 
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "auth_check_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("AUTH_CHECK_SUCCESS", response));
     }
 
     // 비밀번호 변경
     @PatchMapping("/password")
-    public ApiResponse<Void> changePassword(
+    public ResponseEntity<ApiResponse<Void>> changePassword(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody ChangePasswordRequest changePasswordRequest
     ) {
         authService.changePassword(userId, changePasswordRequest);
 
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "password_change_success",
-                null
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("USER_PASSWORD_UPDATED", null));
     }
 
     // 중복 이메일 검사
     @GetMapping("/email/availability")
-    public ApiResponse<Void> checkEmailAvailability(
+    public ResponseEntity<ApiResponse<Void>> checkEmailAvailability(
         @RequestParam(value="email") String email
     ) {
         System.out.println(email);
         authService.validateDuplicateEmail(email);
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "available_email",
-                null
-        );
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("EMAIL_AVAILABLE", null));
     }
 
     // 중복 닉네임 검사
     @GetMapping("/nickname/availability")
-    public ApiResponse<Void> checkNicknameAvailability(
+    public ResponseEntity<ApiResponse<Void>> checkNicknameAvailability(
         @RequestParam(value="nickname") String nickname
     ) {
         authService.validateDuplicateNickname(nickname);
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "available_nickname",
-                null
-        );
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("NICKNAME_AVAILABLE", null));
     }
 }

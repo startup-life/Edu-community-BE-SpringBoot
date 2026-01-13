@@ -6,6 +6,8 @@ import kr.adapterz.edu_community.domain.file.service.FileService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/v1")
 @RequiredArgsConstructor
 public class FileController {
 
@@ -22,29 +24,33 @@ public class FileController {
 
     // 프로필 이미지 업로드
     @PostMapping("/users/me/profile-image")
-    public ApiResponse<FileUploadResponse> uploadProfileImage(
+    public ResponseEntity<ApiResponse<FileUploadResponse>> uploadProfileImage(
             @AuthenticationPrincipal Long userId,
             @RequestPart("profileImage") MultipartFile file
     ) throws FileUploadException {
         File savedFile = fileService.uploadProfileImage(file, userId);
 
-        return ApiResponse.ok(
-                "profile_image_upload_success",
-                new FileUploadResponse(savedFile.getFilePath())
-        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(
+                        "PROFILE_IMAGE_UPLOADED",
+                        new FileUploadResponse(savedFile.getFilePath())
+                ));
     }
 
     // 게시글 첨부파일 업로드
     @PostMapping("/posts/image")
-    public ApiResponse<FileUploadResponse> uploadPostAttachImage(
+    public ResponseEntity<ApiResponse<FileUploadResponse>> uploadPostAttachImage(
             @AuthenticationPrincipal Long userId,
             @RequestPart("attachImage") MultipartFile file
     ) throws FileUploadException {
-        File savedFile = fileService.uploadPostAttachImage(file, userId);
+            File savedFile = fileService.uploadPostAttachImage(file, userId);
 
-        return ApiResponse.ok(
-                "post_attach_image_upload_success",
-                new FileUploadResponse(savedFile.getFilePath())
-        );
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(ApiResponse.of(
+                            "POST_FILE_UPLOADED",
+                            new FileUploadResponse(savedFile.getFilePath())
+                ));
     }
 }

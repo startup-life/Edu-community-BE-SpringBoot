@@ -7,11 +7,12 @@ import kr.adapterz.edu_community.domain.user.service.UserService;
 import kr.adapterz.edu_community.global.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/v1/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -19,42 +20,33 @@ public class UserController {
 
     // 유저 정보 가져오기
     @GetMapping("/{user_id}")
-    public ApiResponse<UserInfoResponse> getUserInfo(@PathVariable("user_id") Long userId) {
-
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(@PathVariable("user_id") Long userId) {
         UserInfoResponse response = userService.getUserInfo(userId);
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "get_user_success",
-                response
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("USER_RETRIEVED", response));
     }
 
     // 회원 정보 수정
     @PatchMapping("/me")
-    public ApiResponse<Void> updateUser(
+    public ResponseEntity<ApiResponse<Void>> updateUser(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateUserRequest updateUserRequest
     ) {
         userService.updateUser(userId, updateUserRequest);
-
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "update_user_success",
-                null
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("USER_UPDATED", null));
     }
 
     // 회원 탈퇴
     @DeleteMapping("/me")
-    public ApiResponse<Void> withdrawUser(
+    public ResponseEntity<ApiResponse<Void>> withdrawUser(
             @AuthenticationPrincipal Long userId
     ) {
         userService.withdrawUser(userId);
-
-        return ApiResponse.of(
-                HttpStatus.OK,
-                "withdraw_user_success",
-                null
-        );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("USER_DELETED", null));
     }
 }
