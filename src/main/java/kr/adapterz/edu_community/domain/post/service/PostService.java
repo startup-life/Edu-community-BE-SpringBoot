@@ -194,7 +194,7 @@ public class PostService {
             return null;
         }
         return fileRepository.findByFilePath(attachFilePath)
-                .orElseThrow(() -> new NotFoundException("file_not_found"));
+                .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FONUD"));
     }
 
 }

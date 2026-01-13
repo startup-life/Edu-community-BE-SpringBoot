@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 
 @Service
@@ -167,7 +169,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public void validateDuplicateEmail(String email) {
         if (userRepository.existsActiveByEmail(email)) {
-            throw new DuplicateException("email_already_exists");
+            throw new DuplicateException("EMAIL_ALREADY_EXISTS");
         }
     }
 
@@ -175,7 +177,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public void validateDuplicateNickname(String nickname) {
         if (userRepository.existsActiveByNickname(nickname)) {
-            throw new DuplicateException("nickname_already_exists");
+            throw new DuplicateException("NICKNAME_ALREADY_EXISTS");
         }
     }
 
@@ -185,7 +187,27 @@ public class AuthService {
             return null;
         }
 
-        return fileRepository.findByFilePath(profileImageUrl)
-                .orElseThrow(() -> new NotFoundException("file_not_found"));
+        // 1. 전체 URL에서 도메인을 떼고 상대 경로만 추출
+        String relativePath = extractPathFromUrl(profileImageUrl);
+
+        // 2. 추출된 상대 경로로 DB 조회
+        return fileRepository.findByFilePath(relativePath)
+                .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FOUND"));
+    }
+
+    // URL에서 도메인을 제외한 경로(Path)만 추출하는 헬퍼 메서드
+    private String extractPathFromUrl(String url) {
+        try {
+            // URI 파싱을 통해 path 부분만 가져옴
+            URI uri = new URI(url);
+            String path = uri.getPath();
+
+            // 혹시 path가 null이면(잘못된 URL 등) 원본 반환
+            return path != null ? path : url;
+
+        } catch (URISyntaxException e) {
+            // URL 형식이 아니라면(이미 상대경로이거나 잘못된 문자열) 그냥 원본 반환
+            return url;
+        }
     }
 }

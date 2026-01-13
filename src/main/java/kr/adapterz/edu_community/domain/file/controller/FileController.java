@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/v1")
@@ -30,11 +31,15 @@ public class FileController {
     ) throws FileUploadException {
         File savedFile = fileService.uploadProfileImage(file, userId);
 
+        // 현재 요청의 도메인+포트를 가져와서 풀 URL 생성
+        // 예: http://localhost:8080 + /public/profile/image.jpg
+        String fileUrl = getFullUrl(savedFile.getFilePath());
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(
                         "PROFILE_IMAGE_UPLOADED",
-                        new FileUploadResponse(savedFile.getFilePath())
+                        new FileUploadResponse(fileUrl)
                 ));
     }
 
@@ -45,12 +50,20 @@ public class FileController {
             @RequestPart("attachImage") MultipartFile file
     ) throws FileUploadException {
             File savedFile = fileService.uploadPostAttachImage(file, userId);
+            String fileUrl = getFullUrl(savedFile.getFilePath());
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(ApiResponse.of(
                             "POST_FILE_UPLOADED",
-                            new FileUploadResponse(savedFile.getFilePath())
+                            new FileUploadResponse(fileUrl)
                 ));
+    }
+
+    // 도메인 붙이는 헬퍼 메서드
+    private String getFullUrl(String relativePath) {
+        // fromCurrentContextPath()는 "http://localhost:8080" 부분까지 가져옵니다.
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        return baseUrl + relativePath;
     }
 }

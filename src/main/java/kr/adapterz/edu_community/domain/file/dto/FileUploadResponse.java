@@ -7,9 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class FileUploadResponse {
 
-    private String filePath;
+    private String fileUrl;
 
-    public static FileUploadResponse of(String filePath) {
-        return new FileUploadResponse(filePath);
+    public static FileUploadResponse of(String fileUrl) {
+        return new FileUploadResponse(fileUrl);
     }
 }

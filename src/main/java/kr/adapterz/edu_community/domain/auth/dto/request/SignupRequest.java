@@ -26,7 +26,7 @@ public class SignupRequest {
     ) // 영문, 숫자, 특수문자를 최소 1개씩 포함해야 함
     private String password;
 
-    @NotBlank(message = "required")
+    @NotBlank(message = "REQUIRED")
     @Size(min = 2, message = "TOO_SHORT") // 명세에는 없지만 보통 최소길이 존재
     @Size(max = 10, message = "TOO_LONG")
     @Pattern(

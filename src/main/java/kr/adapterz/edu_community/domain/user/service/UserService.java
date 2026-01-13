@@ -101,7 +101,7 @@ public class UserService {
 
         // 값이 있으면 해당 파일로 교체
         File newProfileImage = fileRepository.findByFilePath(requestedPath)
-                .orElseThrow(() -> new NotFoundException("file_not_found"));
+                .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FONUD"));
 
         user.updateProfileImage(newProfileImage);
     }
