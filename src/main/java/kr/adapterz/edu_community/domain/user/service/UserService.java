@@ -1,6 +1,5 @@
 package kr.adapterz.edu_community.domain.user.service;
 
-import kr.adapterz.edu_community.domain.auth.dto.response.AuthStatusResponse;
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.user.dto.request.UpdateUserRequest;
@@ -9,10 +8,10 @@ import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserQueryRepository;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import kr.adapterz.edu_community.global.exception.NotFoundException;
+import kr.adapterz.edu_community.global.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Optional;
 
@@ -31,22 +30,11 @@ public class UserService {
         User user = userQueryRepository.findActiveByIdWithProfileImage(userId)
                 .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
 
-        // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImageUrl = Optional.ofNullable(user.getProfileImage())
-                .map(File::getFilePath) // 1. 상대 경로 꺼내기
-                .map(this::generateFullUrl) // 2. 도메인 붙이기 (변환)
-                .orElse(null);
-
-        return UserInfoResponse.of(
-                user.getId(),
-                user.getEmail(),
-                user.getNickname(),
-                profileImageUrl
-        );
+        return UserInfoResponse.from(user);
     }
 
     // 인증 상태 확인
-    @Transactional(readOnly = true)
+    /*@Transactional(readOnly = true)
     public AuthStatusResponse checkAuthStatus(Long userId) {
         User user = userQueryRepository.findActiveByIdWithProfileImage(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
@@ -62,12 +50,12 @@ public class UserService {
                 user.getNickname(),
                 profileImageUrl
         );
-    }
+    }*/
 
     // 유저 정보 수정
     public void updateUser(Long userId, UpdateUserRequest updateUserRequest) {
         User user = userQueryRepository.findActiveByIdWithProfileImage(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
 
         user.updateNickname(updateUserRequest.getNickname());
         applyProfileImage(user, updateUserRequest.getProfileImageUrl());
@@ -86,37 +74,29 @@ public class UserService {
 
     // 프로필 이미지 적용
     private void applyProfileImage(User user, String requestedPath) {
-        // null 이면 프로필 이미지 제거
+        // 1. null 이면 제거
         if (requestedPath == null) {
             user.updateProfileImage(null);
             return;
         }
 
-        // 동일 경로면 불필요한 갱신 방지
+        // [핵심] 프론트에서 온 전체 URL(http://...)을 DB용 상대 경로(/public/...)로 변환
+        String relativePath = FileUtil.extractPathFromUrl(requestedPath);
+
+        // 2. 현재 경로와 비교 (불필요한 갱신 방지)
         String currentPath = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
                 .orElse(null);
-        if (requestedPath.equals(currentPath)) {
+
+        // 둘 다 상대 경로인 상태에서 비교해야 정확함
+        if (relativePath.equals(currentPath)) {
             return;
         }
 
-        // 값이 있으면 해당 파일로 교체
-        File newProfileImage = fileRepository.findByFilePath(requestedPath)
-                .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FONUD"));
+        // 3. 파일 조회 (상대 경로로 조회)
+        File newProfileImage = fileRepository.findByFilePath(relativePath)
+                .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FOUND"));
 
         user.updateProfileImage(newProfileImage);
-    }
-
-    // 전체 URL 생성
-    private String generateFullUrl(String relativePath) {
-        if (relativePath == null) {
-            return null;
-        }
-        // 현재 요청의 Context Path(도메인+포트)를 가져옴
-        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .build()
-                .toUriString();
-
-        return baseUrl + relativePath;
     }
 }
