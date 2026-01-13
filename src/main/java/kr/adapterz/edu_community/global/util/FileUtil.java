@@ -54,4 +54,11 @@ public class FileUtil {
 
         return baseUrl + relativePath;
     }
+
+    // 바이트 단위를 읽기 쉬운 단위(KB, MB 등)로 변환
+    public static String formatSize(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        int z = (63 - Long.numberOfLeadingZeros(bytes)) / 10;
+        return String.format("%.1f %sB", (double)bytes / (1L << (z * 10)), " KMGTPE".charAt(z));
+    }
 }

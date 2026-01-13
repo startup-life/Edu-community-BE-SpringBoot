@@ -2,9 +2,11 @@ package kr.adapterz.edu_community.domain.file.service;
 
 import kr.adapterz.edu_community.domain.file.entity.File;
 import kr.adapterz.edu_community.domain.file.repository.FileRepository;
-import kr.adapterz.edu_community.global.exception.BadRequestException;
+import kr.adapterz.edu_community.global.exception.BusinessException;
+import kr.adapterz.edu_community.global.exception.InvalidFileException;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -48,7 +50,7 @@ public class FileService {
         return uploadFile(file, userId, POST_DIR, POST_URL, "post");
     }
 
-    // [공통 로직 분리] 실제 업로드를 수행하는 내부 메서드
+    // 실제 업로드를 수행하는 내부 메서드
     private File uploadFile(MultipartFile file, Long userId, Path dirPath, String urlPrefix, String type) throws FileUploadException {
         String extension = extractAndValidateExtension(file); // 확장자 검증 포함
         String filename = generateFilename(type, extension);  // 파일명 생성 통합
@@ -60,7 +62,7 @@ public class FileService {
             }
             file.transferTo(savePath.toFile());
         } catch (IOException exception) {
-            throw new FileUploadException("file_upload_failed", exception);
+            throw new BusinessException("INTERNAL_SERVER_ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         String dbFilePath = urlPrefix + filename;
@@ -79,12 +81,12 @@ public class FileService {
     private String extractAndValidateExtension(MultipartFile file) {
         String originalName = file.getOriginalFilename();
         if (originalName == null || originalName.isBlank()) {
-            throw new BadRequestException("required_file_name");
+            throw new InvalidFileException(file.getName(), "FILE_NAME_REQUIRED");
         }
 
         String extension = StringUtils.getFilenameExtension(originalName);
         if (extension == null || !ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
-            throw new BadRequestException("invalid_file_extension"); // 허용되지 않은 확장자
+            throw new InvalidFileException(file.getName(), "INVALID_FILE_EXTENSION"); // 허용되지 않은 확장자
         }
 
         return extension;

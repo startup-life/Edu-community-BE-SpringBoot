@@ -2,8 +2,11 @@ package kr.adapterz.edu_community.global.exception;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import kr.adapterz.edu_community.global.response.ApiResponse;
+import kr.adapterz.edu_community.global.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,8 +18,9 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
-import jakarta.validation.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,12 +45,14 @@ public class GlobalExceptionHandler {
      * 1. HttpMessageNotReadableException: JSON 문법 오류, Body 누락, 파싱 실패
      * 2. MethodArgumentTypeMismatchException: 타입 불일치 (Long 자리에 String 등)
      * 3. MissingServletRequestParameterException: 필수 파라미터 누락
-     * 4. ServletRequestBindingException: 그 외 바인딩 예외
+     * 4. MissingServletRequestPartException: 필수 파일 파트 누락
+     * 5. ServletRequestBindingException: 그 외 바인딩 예외
      */
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class,
+            MissingServletRequestPartException.class,
             ServletRequestBindingException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception exception) {
@@ -69,6 +75,33 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ApiResponse.of("METHOD_NOT_ALLOWED", null));
+    }
+
+    /**
+     * [413] 파일 용량 초과 (Spring 레벨에서 발생)
+     * 명세: code="FILE_TOO_LARGE", data={maxSize: "xxMB", currentSize: "yyMB"}
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException exception) {
+
+        // 실제 발생 원인인 FileSizeLimitExceededException을 찾아서 사이즈 정보를 추출
+        long actualSize = 0;
+        long permittedSize = 0;
+
+        if (exception.getCause() instanceof IllegalStateException
+                && exception.getCause().getCause() instanceof FileSizeLimitExceededException exceededException) {
+            actualSize = exceededException.getActualSize();
+            permittedSize = exceededException.getPermittedSize();
+        }
+
+        Map<String, String> data = new HashMap<>();
+        data.put("maxSize", FileUtil.formatSize(permittedSize));    // 예: 50MB
+        data.put("currentSize", FileUtil.formatSize(actualSize));   // 예: 100MB
+
+        return ResponseEntity
+                .status(HttpStatus.CONTENT_TOO_LARGE) // 413
+                .body(ApiResponse.of("FILE_TOO_LARGE", data));
     }
 
     /**
@@ -119,6 +152,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_CONTENT) // 422
                 .body(ApiResponse.of("INVALID_INPUT", errors));
+    }
+
+    /**
+     * [422] 파일 검증 실패 시 (FileService)
+     * 예외: InvalidFileException
+     */
+    @ExceptionHandler(InvalidFileException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleInvalidFileException(
+            InvalidFileException exception) {
+
+        log.warn("File Validation failed: {}", exception.getErrors());
+
+        return ResponseEntity
+                .status(exception.getStatus()) // 422
+                .body(ApiResponse.of(exception.getCode(), exception.getErrors()));
     }
 
     // 500 Internal Server Error - Unexpected Exceptions
