@@ -19,8 +19,10 @@ public class UserController {
     private final UserService userService;
 
     // 유저 정보 가져오기
-    @GetMapping("/{user_id}")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(@PathVariable("user_id") Long userId) {
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(
+            @AuthenticationPrincipal Long userId
+    ) {
         UserInfoResponse response = userService.getUserInfo(userId);
         return ResponseEntity
                 .status(HttpStatus.OK)

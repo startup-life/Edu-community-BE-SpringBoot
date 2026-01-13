@@ -12,6 +12,7 @@ import kr.adapterz.edu_community.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Optional;
 
@@ -28,19 +29,19 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserInfoResponse getUserInfo(Long userId) {
         User user = userQueryRepository.findActiveByIdWithProfileImage(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
 
         // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
         String profileImageUrl = Optional.ofNullable(user.getProfileImage())
-                .map(File::getFilePath)
+                .map(File::getFilePath) // 1. 상대 경로 꺼내기
+                .map(this::generateFullUrl) // 2. 도메인 붙이기 (변환)
                 .orElse(null);
 
         return UserInfoResponse.of(
                 user.getId(),
                 user.getEmail(),
                 user.getNickname(),
-                profileImageUrl,
-                user.getCreatedAt()
+                profileImageUrl
         );
     }
 
@@ -104,5 +105,18 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FONUD"));
 
         user.updateProfileImage(newProfileImage);
+    }
+
+    // 전체 URL 생성
+    private String generateFullUrl(String relativePath) {
+        if (relativePath == null) {
+            return null;
+        }
+        // 현재 요청의 Context Path(도메인+포트)를 가져옴
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .build()
+                .toUriString();
+
+        return baseUrl + relativePath;
     }
 }
