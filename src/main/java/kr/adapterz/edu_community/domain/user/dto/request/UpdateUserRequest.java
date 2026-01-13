@@ -10,5 +10,5 @@ public class UpdateUserRequest {
 
     @NotBlank(message = "required")
     private String nickname;
-    private String profileImagePath;
+    private String profileImageUrl;
 }

@@ -12,18 +12,18 @@ public class UserInfoResponse {
     private Long id;
     private String email;
     private String nickname;
-    private String profileImagePath;
+    private String profileImageUrl;
     private LocalDateTime createdAt;
 
     public static UserInfoResponse of(
             Long userId,
             String email,
             String nickname,
-            String profileImagePath,
+            String profileImageUrl,
             LocalDateTime createdAt
     ) {
         return new UserInfoResponse(
-                userId, email, nickname, profileImagePath, createdAt
+                userId, email, nickname, profileImageUrl, createdAt
         );
     }
 }

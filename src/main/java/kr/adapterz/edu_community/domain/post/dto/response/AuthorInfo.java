@@ -9,16 +9,16 @@ public class AuthorInfo {
 
     private Long userId;
     private String nickname;
-    private String profileImagePath;
+    private String profileImageUrl;
 
     public static AuthorInfo of(
             Long userId,
             String nickname,
-            String profileImagePath) {
+            String profileImageUrl) {
         return new AuthorInfo(
                 userId,
                 nickname,
-                profileImagePath
+                profileImageUrl
         );
     }
 }

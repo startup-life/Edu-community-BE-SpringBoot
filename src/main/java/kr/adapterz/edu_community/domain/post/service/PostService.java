@@ -67,7 +67,7 @@ public class PostService {
         User user = post.getAuthor();
 
         // 작성자 프로필 이미지 조회 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+        String profileImageUrl = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
                 .orElse(null);
 
@@ -84,7 +84,7 @@ public class PostService {
                 AuthorInfo.of(
                         user.getId(),
                         user.getNickname(),
-                        profileImagePath
+                        profileImageUrl
                 ),
                 attachFile != null ? AttachFileInfo.of(attachFile.getId(), attachFile.getFilePath()) : null,
                 post.getCreatedAt()
@@ -169,7 +169,7 @@ public class PostService {
         }
 
         // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+        String profileImageUrl = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
                 .orElse(null);
 
@@ -183,7 +183,7 @@ public class PostService {
                 AuthorInfo.of(
                         user.getId(),
                         user.getNickname(),
-                        profileImagePath
+                        profileImageUrl
                 ),
                 post.getCreatedAt()
         );

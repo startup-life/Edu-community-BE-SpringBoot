@@ -103,7 +103,7 @@ public class CommentService {
         User user = comment.getAuthor();
 
         // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+        String profileImageUrl = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
                 .orElse(null);
 
@@ -113,7 +113,7 @@ public class CommentService {
                 AuthorInfo.of(
                         user.getId(),
                         user.getNickname(),
-                        profileImagePath
+                        profileImageUrl
                 ),
                 comment.getCreatedAt()
         );

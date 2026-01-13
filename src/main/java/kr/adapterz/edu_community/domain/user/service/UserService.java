@@ -31,7 +31,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+        String profileImageUrl = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
                 .orElse(null);
 
@@ -39,7 +39,7 @@ public class UserService {
                 user.getId(),
                 user.getEmail(),
                 user.getNickname(),
-                profileImagePath,
+                profileImageUrl,
                 user.getCreatedAt()
         );
     }
@@ -51,7 +51,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+        String profileImageUrl = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
                 .orElse(null);
 
@@ -59,7 +59,7 @@ public class UserService {
                 String.valueOf(user.getId()),
                 user.getEmail(),
                 user.getNickname(),
-                profileImagePath
+                profileImageUrl
         );
     }
 
@@ -69,7 +69,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         user.updateNickname(updateUserRequest.getNickname());
-        applyProfileImage(user, updateUserRequest.getProfileImagePath());
+        applyProfileImage(user, updateUserRequest.getProfileImageUrl());
     }
 
     // 회원 탈퇴
