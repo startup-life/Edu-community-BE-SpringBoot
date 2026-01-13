@@ -3,7 +3,7 @@ package kr.adapterz.edu_community.domain.comment.controller;
 import kr.adapterz.edu_community.domain.comment.dto.request.CommentRequest;
 import kr.adapterz.edu_community.domain.comment.dto.response.CommentsResponse;
 import kr.adapterz.edu_community.domain.comment.service.CommentService;
-import kr.adapterz.edu_community.global.common.response.ApiResponse;
+import kr.adapterz.edu_community.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

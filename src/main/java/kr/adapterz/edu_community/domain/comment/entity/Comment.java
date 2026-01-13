@@ -3,7 +3,7 @@ package kr.adapterz.edu_community.domain.comment.entity;
 import jakarta.persistence.*;
 import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.user.entity.User;
-import kr.adapterz.edu_community.global.common.entity.BaseEntity;
+import kr.adapterz.edu_community.global.entity.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;

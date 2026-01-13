@@ -1,12 +1,15 @@
 package kr.adapterz.edu_community.domain.user.controller;
 
 import jakarta.validation.Valid;
+import kr.adapterz.edu_community.domain.user.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.user.dto.request.UpdateUserRequest;
 import kr.adapterz.edu_community.domain.user.dto.response.UserInfoResponse;
 import kr.adapterz.edu_community.domain.user.service.UserService;
-import kr.adapterz.edu_community.global.common.response.ApiResponse;
+import kr.adapterz.edu_community.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +22,10 @@ public class UserController {
     private final UserService userService;
 
     // 유저 정보 가져오기
-    @GetMapping("/{user_id}")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(@PathVariable("user_id") Long userId) {
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(
+            @AuthenticationPrincipal Long userId
+    ) {
         UserInfoResponse response = userService.getUserInfo(userId);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -39,14 +44,37 @@ public class UserController {
                 .body(ApiResponse.of("USER_UPDATED", null));
     }
 
+    // 비밀번호 변경
+    @PatchMapping("/me/password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody ChangePasswordRequest changePasswordRequest
+    ) {
+        userService.changePassword(userId, changePasswordRequest);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("USER_PASSWORD_UPDATED", null));
+    }
+
     // 회원 탈퇴
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Void>> withdrawUser(
             @AuthenticationPrincipal Long userId
     ) {
         userService.withdrawUser(userId);
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .path("/")
+                .httpOnly(true)
+                .secure(false) // 운영환경에선 true
+                .sameSite("Lax")
+                .maxAge(0)
+                .build();
+
         return ResponseEntity
                 .status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(ApiResponse.of("USER_DELETED", null));
     }
 }

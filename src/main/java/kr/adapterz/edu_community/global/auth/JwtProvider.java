@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.global.security.jwt;
+package kr.adapterz.edu_community.global.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

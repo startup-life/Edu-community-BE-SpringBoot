@@ -2,7 +2,6 @@ package kr.adapterz.edu_community.domain.auth.service;
 
 import kr.adapterz.edu_community.domain.auth.dto.internal.LoginResult;
 import kr.adapterz.edu_community.domain.auth.dto.internal.TokenResult;
-import kr.adapterz.edu_community.domain.auth.dto.request.ChangePasswordRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.LoginRequest;
 import kr.adapterz.edu_community.domain.auth.dto.request.SignupRequest;
 import kr.adapterz.edu_community.domain.auth.dto.response.AuthStatusResponse;
@@ -16,16 +15,17 @@ import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserQueryRepository;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
-import kr.adapterz.edu_community.global.common.exception.AuthorizedException;
-import kr.adapterz.edu_community.global.common.exception.DuplicateException;
-import kr.adapterz.edu_community.global.common.exception.NotFoundException;
-import kr.adapterz.edu_community.global.security.jwt.JwtProvider;
+import kr.adapterz.edu_community.global.auth.JwtProvider;
+import kr.adapterz.edu_community.global.exception.AuthorizedException;
+import kr.adapterz.edu_community.global.exception.DuplicateException;
+import kr.adapterz.edu_community.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 
 @Service
@@ -45,7 +45,7 @@ public class AuthService {
         validateDuplicateEmail(signupRequest.getEmail());
         validateDuplicateNickname(signupRequest.getNickname());
 
-        File profileImage = resolveProfileImage(signupRequest.getProfileImagePath());
+        File profileImage = resolveProfileImage(signupRequest.getProfileImageUrl());
 
         User user = new User(
                 signupRequest.getEmail(),
@@ -62,13 +62,13 @@ public class AuthService {
     // 로그인
     public LoginResult login(LoginRequest loginRequest) {
         User user = userQueryRepository.findActiveByEmailWithProfileImage(loginRequest.getEmail())
-                .orElseThrow(() -> new AuthorizedException("invalid_credentials"));
+                .orElseThrow(() -> new AuthorizedException("INVALID_CREDENTIALS"));
 
         if (!passwordEncoder.matches(
                 loginRequest.getPassword(),
                 user.getPassword()
         )) {
-            throw new AuthorizedException("invalid_credentials");
+            throw new AuthorizedException("INVALID_CREDENTIALS");
         }
 
         String accessToken = jwtProvider.createAccessToken(
@@ -95,17 +95,16 @@ public class AuthService {
 
     // 액세스 토큰 재발급
     public TokenResult refreshAccessToken(String refreshToken) {
-
         RefreshToken saved = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new AuthorizedException("invalid_refresh_token"));
+                .orElseThrow(() -> new AuthorizedException("UNAUTHORIZED"));
 
         if (saved.isExpired()) {
             refreshTokenRepository.delete(saved);
-            throw new AuthorizedException("refresh_token_expired");
+            throw new AuthorizedException("UNAUTHORIZED");
         }
 
         User user = userRepository.findActiveById(saved.getUserId())
-                .orElseThrow(() -> new AuthorizedException("invalid_refresh_token"));
+                .orElseThrow(() -> new AuthorizedException("UNAUTHORIZED"));
 
         String newAccessToken = jwtProvider.createAccessToken(
                 user.getId(),
@@ -137,37 +136,29 @@ public class AuthService {
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
         // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImagePath = null;
+        String profileImageUrl = null;
         if (user.getProfileImage() != null) {
-            profileImagePath = user.getProfileImage().getFilePath();
+            profileImageUrl = user.getProfileImage().getFilePath();
         }
 
         return AuthStatusResponse.of(
                 String.valueOf(user.getId()),
                 user.getEmail(),
                 user.getNickname(),
-                profileImagePath
+                profileImageUrl
         );
     }
 
-    // 비밀번호 변경
-    public void changePassword(
-            Long userId,
-            @RequestBody ChangePasswordRequest changePasswordRequest
-    ) {
-        User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
-
-        String newPassword = passwordEncoder.encode(changePasswordRequest.getPassword());
-        user.updatePassword(newPassword);
-        userRepository.save(user);
+    // 로그아웃
+    public void logout(Long userId) {
+        refreshTokenRepository.deleteByUserId(userId);
     }
 
     // 중복 이메일 검사
     @Transactional(readOnly = true)
     public void validateDuplicateEmail(String email) {
         if (userRepository.existsActiveByEmail(email)) {
-            throw new DuplicateException("email_already_exists");
+            throw new DuplicateException("EMAIL_ALREADY_EXISTS");
         }
     }
 
@@ -175,17 +166,37 @@ public class AuthService {
     @Transactional(readOnly = true)
     public void validateDuplicateNickname(String nickname) {
         if (userRepository.existsActiveByNickname(nickname)) {
-            throw new DuplicateException("nickname_already_exists");
+            throw new DuplicateException("NICKNAME_ALREADY_EXISTS");
         }
     }
 
     // ========== Private Methods ==========
-    private File resolveProfileImage(String profileImagePath) {
-        if (profileImagePath == null || profileImagePath.isBlank()) {
+    private File resolveProfileImage(String profileImageUrl) {
+        if (profileImageUrl == null || profileImageUrl.isBlank()) {
             return null;
         }
 
-        return fileRepository.findByFilePath(profileImagePath)
-                .orElseThrow(() -> new NotFoundException("file_not_found"));
+        // 1. 전체 URL에서 도메인을 떼고 상대 경로만 추출
+        String relativePath = extractPathFromUrl(profileImageUrl);
+
+        // 2. 추출된 상대 경로로 DB 조회
+        return fileRepository.findByFilePath(relativePath)
+                .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FOUND"));
+    }
+
+    // URL에서 도메인을 제외한 경로(Path)만 추출하는 헬퍼 메서드
+    private String extractPathFromUrl(String url) {
+        try {
+            // URI 파싱을 통해 path 부분만 가져옴
+            URI uri = new URI(url);
+            String path = uri.getPath();
+
+            // 혹시 path가 null이면(잘못된 URL 등) 원본 반환
+            return path != null ? path : url;
+
+        } catch (URISyntaxException e) {
+            // URL 형식이 아니라면(이미 상대경로이거나 잘못된 문자열) 그냥 원본 반환
+            return url;
+        }
     }
 }

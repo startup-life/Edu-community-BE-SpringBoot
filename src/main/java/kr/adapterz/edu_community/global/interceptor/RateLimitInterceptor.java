@@ -1,11 +1,11 @@
-package kr.adapterz.edu_community.global.common.interceptor;
+package kr.adapterz.edu_community.global.interceptor;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.adapterz.edu_community.global.common.exception.RateLimitException;
+import kr.adapterz.edu_community.global.exception.RateLimitException;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;

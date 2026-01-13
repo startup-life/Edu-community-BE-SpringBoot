@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.global.common.interceptor;
+package kr.adapterz.edu_community.global.interceptor;
 
 import io.github.bucket4j.Bandwidth;
 import lombok.Getter;

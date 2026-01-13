@@ -1,4 +1,4 @@
-package kr.adapterz.edu_community.global.common.entity;
+package kr.adapterz.edu_community.global.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

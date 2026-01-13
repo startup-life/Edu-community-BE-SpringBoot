@@ -1,7 +1,7 @@
 package kr.adapterz.edu_community.global.config;
 
-import kr.adapterz.edu_community.global.common.response.ApiResponse;
-import kr.adapterz.edu_community.global.security.jwt.JwtAuthenticationFilter;
+import kr.adapterz.edu_community.global.response.ApiResponse;
+import kr.adapterz.edu_community.global.auth.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

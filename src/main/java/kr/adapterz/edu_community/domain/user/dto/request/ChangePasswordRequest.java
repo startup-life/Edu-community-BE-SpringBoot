@@ -1,21 +1,14 @@
-package kr.adapterz.edu_community.domain.auth.dto.request;
+package kr.adapterz.edu_community.domain.user.dto.request;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
-@NoArgsConstructor
-public class LoginRequest {
-
-    @NotBlank(message = "REQUIRED")
-    @Email(message = "INVALID_FORMAT")
-    private String email;
+@AllArgsConstructor
+public class ChangePasswordRequest {
 
     @NotBlank(message = "REQUIRED")
     @Size(min = 8, message = "TOO_SHORT") // 길이가 8 미만

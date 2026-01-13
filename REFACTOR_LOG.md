@@ -27,14 +27,14 @@ private String getAuthorProfileImagePath(Long authorId) {
     User user = userRepository.findById(authorId)
             .orElseThrow(() -> new NotFoundException("user not found"));
 
-    String profileImagePath = "/public/images/profile/default.jpg";
+    String profileImageUrl = "/public/images/profile/default.jpg";
     if (user.getProfileImageId() != null) {
-        profileImagePath = fileRepository.findById(user.getProfileImageId())
+        profileImageUrl = fileRepository.findById(user.getProfileImageId())
                 .map(File::getFilePath)
-                .orElse(profileImagePath);
+                .orElse(profileImageUrl);
     }
 
-    return profileImagePath;
+    return profileImageUrl;
 }
 ```
 
@@ -100,23 +100,23 @@ private PostInfo toPostInfo(Post post, PostRelationData data) {
         throw new NotFoundException("user_not_found for id: " + post.getAuthor().getId());
     }
 
-    String profileImagePath = setProfileImagePath(user, data);
+    String profileImageUrl = setProfileImagePath(user, data);
 
-    return PostInfo.from(post, user, profileImagePath);
+    return PostInfo.from(post, user, profileImageUrl);
 }
 
 // 프로필 이미지 경로 설정 메서드
 private String setProfileImagePath(User user, PostRelationData data) {
-    String profileImagePath = "/public/images/profile/default.jpg";
+    String profileImageUrl = "/public/images/profile/default.jpg";
 
     if (user.getProfileImageId() != null) {
         File file = data.getFileMap().get(user.getProfileImageId());
         if(file != null) {
-            profileImagePath = file.getFilePath();
+            profileImageUrl = file.getFilePath();
         }
     }
 
-    return profileImagePath;
+    return profileImageUrl;
 }
 ```
 
@@ -195,7 +195,7 @@ PostInfo.of(
 AuthorInfo.from(
     userId,
     nickname,
-    profileImagePath
+    profileImageUrl
 );
 ```
 

@@ -12,7 +12,7 @@ import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
-import kr.adapterz.edu_community.global.common.exception.NotFoundException;
+import kr.adapterz.edu_community.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,7 +103,7 @@ public class CommentService {
         User user = comment.getAuthor();
 
         // 프로필 이미지 (null이면 프론트엔드에서 기본 이미지 사용)
-        String profileImagePath = Optional.ofNullable(user.getProfileImage())
+        String profileImageUrl = Optional.ofNullable(user.getProfileImage())
                 .map(File::getFilePath)
                 .orElse(null);
 
@@ -113,7 +113,7 @@ public class CommentService {
                 AuthorInfo.of(
                         user.getId(),
                         user.getNickname(),
-                        profileImagePath
+                        profileImageUrl
                 ),
                 comment.getCreatedAt()
         );
