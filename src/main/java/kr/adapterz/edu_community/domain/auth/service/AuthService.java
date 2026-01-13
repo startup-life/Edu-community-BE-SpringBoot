@@ -97,17 +97,16 @@ public class AuthService {
 
     // 액세스 토큰 재발급
     public TokenResult refreshAccessToken(String refreshToken) {
-
         RefreshToken saved = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new AuthorizedException("invalid_refresh_token"));
+                .orElseThrow(() -> new AuthorizedException("UNAUTHORIZED"));
 
         if (saved.isExpired()) {
             refreshTokenRepository.delete(saved);
-            throw new AuthorizedException("refresh_token_expired");
+            throw new AuthorizedException("UNAUTHORIZED");
         }
 
         User user = userRepository.findActiveById(saved.getUserId())
-                .orElseThrow(() -> new AuthorizedException("invalid_refresh_token"));
+                .orElseThrow(() -> new AuthorizedException("UNAUTHORIZED"));
 
         String newAccessToken = jwtProvider.createAccessToken(
                 user.getId(),
