@@ -68,15 +68,18 @@ public class PostController {
 
     // 게시글 수정
     @PutMapping("/{postId}")
-    public ResponseEntity<ApiResponse<Long>> updatePost(
-            @PathVariable("postId") Long postId,
+    public ResponseEntity<ApiResponse<Void>> updatePost(
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody UpdatePostRequest updatePostRequest
     ) {
-        Long response = postService.updatePost(postId, updatePostRequest);
+        postService.updatePost(postId, userId, updatePostRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.of("POST_UPDATED", response));
+                .body(ApiResponse.of("POST_UPDATED", null));
     }
 
     // 게시글 삭제

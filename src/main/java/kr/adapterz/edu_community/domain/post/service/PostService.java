@@ -11,6 +11,7 @@ import kr.adapterz.edu_community.domain.post.repository.PostQueryRepository;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
+import kr.adapterz.edu_community.global.exception.AccessDeniedException;
 import kr.adapterz.edu_community.global.exception.NotFoundException;
 import kr.adapterz.edu_community.global.util.FileUtil;
 import lombok.RequiredArgsConstructor;
@@ -113,19 +114,21 @@ public class PostService {
     }
 
     // 게시글 수정
-    public Long updatePost(Long postId, UpdatePostRequest updatePostRequest) {
+    public void updatePost(Long postId, Long userId, UpdatePostRequest updatePostRequest) {
         Post post = postRepository.findActiveById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
 
-        File attachFile = resolveAttachFile(updatePostRequest.getAttachFilePath());
+        if (!post.getAuthor().getId().equals(userId)) {
+            throw new AccessDeniedException("FORBIDDEN");
+        }
+
+        File attachFile = resolveAttachFile(updatePostRequest.getAttachFileUrl());
 
         post.update(
                 updatePostRequest.getTitle(),
                 updatePostRequest.getContent(),
                 attachFile
         );
-
-        return post.getId();
     }
 
     // 게시글 삭제
