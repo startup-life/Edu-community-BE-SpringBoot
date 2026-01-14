@@ -58,9 +58,10 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostResponse>> getPost(
             @PathVariable("postId")
             @Positive(message = "INVALID_FORMAT")
-            Long postId
+            Long postId,
+            @AuthenticationPrincipal Long userId
     ) {
-        PostResponse response = postService.getPost(postId);
+        PostResponse response = postService.getPost(postId, userId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

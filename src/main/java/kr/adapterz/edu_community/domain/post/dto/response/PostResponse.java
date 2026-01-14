@@ -15,6 +15,7 @@ public class PostResponse {
     private int likeCount;
     private int commentCount;
     private int hits;
+    private boolean isLiked;
     private AuthorInfo author;
     private AttachFileInfo file;
     private LocalDateTime createdAt;
@@ -26,6 +27,7 @@ public class PostResponse {
             int likeCount,
             int commentCount,
             int hits,
+            boolean isLiked,
             AuthorInfo author,
             AttachFileInfo file,
             LocalDateTime createdAt
@@ -37,6 +39,7 @@ public class PostResponse {
                 likeCount,
                 commentCount,
                 hits,
+                isLiked,
                 author,
                 file,
                 createdAt
