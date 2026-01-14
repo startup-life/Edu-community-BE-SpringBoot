@@ -31,6 +31,24 @@ public class CommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
+    // 댓글 작성
+    public void createComment(
+            Long postId,
+            Long userId,
+            String content
+    ) {
+        User author = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
+
+        Comment comment = Comment.create(content, author, post);
+
+        commentRepository.save(comment);
+        increaseCommentCount(post);
+    }
+
     // 특정 게시글의 댓글 조회
     @Transactional(readOnly = true)
     public CommentsResponse getComments(Long postId) {
@@ -43,26 +61,6 @@ public class CommentService {
                         .map(this::toCommentInfo)
                         .toList()
         );
-    }
-
-    // 댓글 작성
-    public Long createComment(
-            Long postId,
-            Long userId,
-            String content
-    ) {
-        User author = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
-
-        Post post = postRepository.findActiveById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
-
-        Comment comment = Comment.create(content, author, post);
-        Comment savedComment = commentRepository.save(comment);
-
-        increaseCommentCount(post);
-
-        return savedComment.getId();
     }
 
     // 댓글 수정

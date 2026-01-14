@@ -1,5 +1,7 @@
 package kr.adapterz.edu_community.domain.comment.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import kr.adapterz.edu_community.domain.comment.dto.request.CommentRequest;
 import kr.adapterz.edu_community.domain.comment.dto.response.CommentsResponse;
 import kr.adapterz.edu_community.domain.comment.service.CommentService;
@@ -8,14 +10,36 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/posts/{post_id}/comments")
 @RequiredArgsConstructor
+@Validated
 public class CommentController {
 
     private final CommentService commentService;
+
+    // 댓글 작성
+    @PostMapping()
+    public ResponseEntity<ApiResponse<Void>> createComment(
+            @PathVariable("post_id")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId,
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody CommentRequest createCommentRequest
+    ) {
+        commentService.createComment(
+                postId,
+                userId,
+                createCommentRequest.getContent()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of("COMMENT_CREATED", null));
+    }
 
     // 특정 게시글의 댓글 조회
     @GetMapping()
@@ -27,24 +51,6 @@ public class CommentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.of("COMMENTS_RETRIEVED", response));
-    }
-
-    // 댓글 작성
-    @PostMapping()
-    public ResponseEntity<ApiResponse<Long>> createComment(
-            @PathVariable("post_id") Long postId,
-            @AuthenticationPrincipal Long userId,
-            @RequestBody CommentRequest createCommentRequest
-    ) {
-        Long response = commentService.createComment(
-                postId,
-                userId,
-                createCommentRequest.getContent()
-        );
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.of("COMMENT_CREATED", null));
     }
 
     // 댓글 수정

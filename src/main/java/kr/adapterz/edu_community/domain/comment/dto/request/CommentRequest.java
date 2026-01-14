@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CommentRequest {
 
-    @NotBlank(message = "required")
-    @Size(max = 1500, message = "invalid_length")
+    @NotBlank(message = "REQUIRED")
+    @Size(max = 1500, message = "TOO_LONG")
     private String content;
 }
