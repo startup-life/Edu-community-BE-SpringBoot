@@ -1,7 +1,11 @@
 package kr.adapterz.edu_community.domain.post.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.request.UpdatePostRequest;
+import kr.adapterz.edu_community.domain.post.dto.response.PostIdResponse;
+import kr.adapterz.edu_community.domain.post.dto.response.PostLikeResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.service.PostService;
@@ -10,14 +14,29 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/posts")
 @RequiredArgsConstructor
+@Validated
 public class PostController {
 
     private final PostService postService;
+
+    // 게시글 작성
+    @PostMapping
+    public ResponseEntity<ApiResponse<PostIdResponse>> createPost(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody CreatePostRequest createPostRequest
+    ) {
+        Long createdPostId = postService.createPost(userId, createPostRequest);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of("POST_CREATED", PostIdResponse.from(createdPostId)));
+    }
 
     // 개사굴 목록 조회
     @GetMapping()
@@ -35,9 +54,11 @@ public class PostController {
     }
 
     // 개사굴 단일 조회
-    @GetMapping("/{post_id}")
+    @GetMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostResponse>> getPost(
-            @PathVariable("post_id") Long postId
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId
     ) {
         PostResponse response = postService.getPost(postId);
 
@@ -46,38 +67,31 @@ public class PostController {
                 .body(ApiResponse.of("POST_RETRIEVED", response));
     }
 
-    // 게시글 작성
-    @PostMapping()
-    public ResponseEntity<ApiResponse<Long>> createPost(
-            @AuthenticationPrincipal Long userId,
-            @RequestBody CreatePostRequest createPostRequest
-    ) {
-        Long response = postService.createPost(userId, createPostRequest);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.of("POST_CREATED", response));
-    }
-
     // 게시글 수정
-    @PutMapping("/{post_id}")
-    public ResponseEntity<ApiResponse<Long>> updatePost(
-            @PathVariable("post_id") Long postId,
+    @PutMapping("/{postId}")
+    public ResponseEntity<ApiResponse<Void>> updatePost(
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId,
+            @AuthenticationPrincipal Long userId,
             @RequestBody UpdatePostRequest updatePostRequest
     ) {
-        Long response = postService.updatePost(postId, updatePostRequest);
+        postService.updatePost(postId, userId, updatePostRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ApiResponse.of("POST_UPDATED", response));
+                .body(ApiResponse.of("POST_UPDATED", null));
     }
 
     // 게시글 삭제
-    @DeleteMapping("/{post_id}")
+    @DeleteMapping("/{postId}")
     public ResponseEntity<ApiResponse<Void>> deletePost(
-        @PathVariable("post_id")  Long postId
+        @PathVariable("postId")
+        @AuthenticationPrincipal Long userId,
+        @Positive(message = "INVALID_FORMAT")
+        Long postId
     ) {
-        postService.deletePost(postId);
+        postService.deletePost(postId, userId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -85,14 +99,46 @@ public class PostController {
     }
 
     // 게시글 조회수 증가
-    @PostMapping("/{post_id}/views")
+    @PostMapping("/{postId}/views")
     public ResponseEntity<ApiResponse<Void>> increasePostViews(
-            @PathVariable("post_id") Long postId
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId
     ) {
         postService.increasePostViews(postId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.of("POST_VIEW_INCREASED", null));
+    }
+
+    // 게시글 좋아요 증가
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<ApiResponse<PostLikeResponse>> increasePostLikes(
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId,
+            @AuthenticationPrincipal Long userId
+    ) {
+        PostLikeResponse updatedLikeCount = postService.increasePostLikes(postId, userId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of("POST_LIKE_CREATED", updatedLikeCount));
+    }
+
+    // 게시글 좋아요 감소
+    @DeleteMapping("/{postId}/likes")
+    public ResponseEntity<ApiResponse<PostLikeResponse>> decreasePostLikes(
+        @PathVariable("postId")
+        @Positive(message = "INVALID_FORMAT")
+        Long postId,
+        @AuthenticationPrincipal Long userId
+    ) {
+        PostLikeResponse updatedLikeCount = postService.decreasePostLikes(postId, userId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("POST_LIKE_DELETED", updatedLikeCount));
     }
 }

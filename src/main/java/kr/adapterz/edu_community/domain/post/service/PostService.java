@@ -7,11 +7,16 @@ import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.request.UpdatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.response.*;
 import kr.adapterz.edu_community.domain.post.entity.Post;
+import kr.adapterz.edu_community.domain.post.entity.PostLike;
+import kr.adapterz.edu_community.domain.post.repository.PostLikeRepository;
 import kr.adapterz.edu_community.domain.post.repository.PostQueryRepository;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
+import kr.adapterz.edu_community.global.exception.AccessDeniedException;
+import kr.adapterz.edu_community.global.exception.DuplicateException;
 import kr.adapterz.edu_community.global.exception.NotFoundException;
+import kr.adapterz.edu_community.global.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,8 +38,29 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostQueryRepository postQueryRepository;
+    private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
+
+    // 게시글 작성
+    public Long createPost(Long authorId, CreatePostRequest createPostRequest) {
+        User author = userRepository.findActiveById(authorId)
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+
+        File attachFile = resolveAttachFile(createPostRequest.getAttachFileUrl());
+        System.out.println("================= attachFile: " + attachFile);
+        Post post = Post.create(
+                createPostRequest.getTitle(),
+                createPostRequest.getContent(),
+                author,
+                attachFile
+        );
+
+        postRepository.save(post);
+
+        // 무거운 변환 로직 제거하고 ID만 반환
+        return post.getId();
+    }
 
     // 개사굴 목록 조회
     @Transactional(readOnly = true)
@@ -61,7 +87,7 @@ public class PostService {
     public PostResponse getPost(Long postId) {
         // 게시글 조회
         Post post = postQueryRepository.findByIdWithAuthor(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
 
         // 작성자 조회
         User user = post.getAuthor();
@@ -91,52 +117,80 @@ public class PostService {
         );
     }
 
-    // 게시글 작성
-    public Long createPost(Long authorId, CreatePostRequest createPostRequest) {
-
-        User author = userRepository.findActiveById(authorId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
-
-        File attachFile = resolveAttachFile(createPostRequest.getAttachFilePath());
-
-        Post post = Post.create(
-                createPostRequest.getTitle(),
-                createPostRequest.getContent(),
-                author,
-                attachFile
-        );
-
-        return postRepository.save(post).getId();
-    }
-
     // 게시글 수정
-    public Long updatePost(Long postId, UpdatePostRequest updatePostRequest) {
+    public void updatePost(Long postId, Long userId, UpdatePostRequest updatePostRequest) {
         Post post = postRepository.findActiveById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
 
-        File attachFile = resolveAttachFile(updatePostRequest.getAttachFilePath());
+        if (!post.getAuthor().getId().equals(userId)) {
+            throw new AccessDeniedException("FORBIDDEN");
+        }
+
+        File attachFile = resolveAttachFile(updatePostRequest.getAttachFileUrl());
 
         post.update(
                 updatePostRequest.getTitle(),
                 updatePostRequest.getContent(),
                 attachFile
         );
-
-        return post.getId();
     }
 
     // 게시글 삭제
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId, Long userId) {
         Post post = postRepository.findActiveById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
-        post.delete();
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
+
+        if (!post.getAuthor().getId().equals(userId)) {
+            throw new AccessDeniedException("FORBIDDEN");
+        }
+
+        post.withdraw();
     }
 
     // 게시글 조회수 증가
     public void increasePostViews(Long postId) {
         Post post = postRepository.findActiveById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
         post.increaseHits();
+    }
+
+    // 게시글 좋아요 증가
+    public PostLikeResponse increasePostLikes(Long postId, Long userId) {
+        // 게시글 조회
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
+
+        // 유저 조회
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+
+        // 중복 좋아요 체크
+        if (postLikeRepository.existsByUserIdAndPostId(userId, postId)) {
+            throw new DuplicateException("POST_ALREADY_LIKED");
+        }
+
+        // 좋아요 저장 및 게시글 좋아요 수 증가
+        postLikeRepository.save(new PostLike(user, post));
+        post.increaseLikes();
+
+        // DB에서 반영된 값을 가져오지 않고, 증가된 값을 바로 반환 (성능 최적화)
+        return PostLikeResponse.of(post.getLikeCount());
+    }
+
+    // 게시글 좋아요 감소
+    public PostLikeResponse decreasePostLikes(Long postId, Long userId) {
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
+
+        // 좋아요 기록 조회
+        PostLike postlike = postLikeRepository.findByUserIdAndPostId(userId, postId)
+                .orElseThrow(() -> new NotFoundException("POST_LIKE_NOT_FOUND"));
+
+        // 좋아요 삭제 및 게시글 좋아요 수 감소
+        postLikeRepository.delete(postlike);
+        post.decreaseLikes();
+
+        return PostLikeResponse.of(post.getLikeCount());
     }
 
     // ================================= 내부 메서드 =================================//
@@ -190,11 +244,15 @@ public class PostService {
     }
 
     private File resolveAttachFile(String attachFilePath) {
-        if (attachFilePath == null || attachFilePath.isBlank()) {
+        // FileUtil 적용: URL이 들어와도 Path만 추출
+        String path = FileUtil.extractPathFromUrl(attachFilePath);
+
+        if (path == null || path.isBlank()) {
             return null;
         }
-        return fileRepository.findByFilePath(attachFilePath)
-                .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FONUD"));
+
+        return fileRepository.findByFilePath(path)
+                .orElseThrow(() -> new NotFoundException("ATTACH_FILE_NOT_FOUND")); // 오타 수정 및 명칭 변경
     }
 
 }
