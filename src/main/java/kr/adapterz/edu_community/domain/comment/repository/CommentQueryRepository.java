@@ -7,6 +7,5 @@ import java.util.Optional;
 
 public interface CommentQueryRepository {
     List<Comment> findAllByPostIdWithAuthor(Long postId);
-    Optional<Comment> findByIdAndPostIdAndAuthorId(Long commentId, Long postId, Long authorId);
     Optional<Comment> findByIdAndPostId(Long commentId, Long postId);
 }

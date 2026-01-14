@@ -14,7 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/v1/posts/{post_id}/comments")
+@RequestMapping("/v1/posts/{postId}/comments")
 @RequiredArgsConstructor
 @Validated
 public class CommentController {
@@ -24,7 +24,7 @@ public class CommentController {
     // 댓글 작성
     @PostMapping()
     public ResponseEntity<ApiResponse<Void>> createComment(
-            @PathVariable("post_id")
+            @PathVariable("postId")
             @Positive(message = "INVALID_FORMAT")
             Long postId,
             @AuthenticationPrincipal Long userId,
@@ -44,7 +44,7 @@ public class CommentController {
     // 특정 게시글의 댓글 조회
     @GetMapping()
     public ResponseEntity<ApiResponse<CommentsResponse>> getComments(
-            @PathVariable("post_id") Long postId
+            @PathVariable("postId") Long postId
     ) {
         CommentsResponse response = commentService.getComments(postId);
 
@@ -54,12 +54,16 @@ public class CommentController {
     }
 
     // 댓글 수정
-    @PutMapping({"/{comment_id}"})
+    @PutMapping({"/{commentId}"})
     public ResponseEntity<ApiResponse<Void>> updateComment(
-            @PathVariable("post_id") Long postId,
-            @PathVariable("comment_id") Long commentId,
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId,
+            @PathVariable("commentId")
+            @Positive(message = "INVALID_FORMAT")
+            Long commentId,
             @AuthenticationPrincipal Long userId,
-            @RequestBody CommentRequest updateCommentRequest
+            @Valid @RequestBody CommentRequest updateCommentRequest
     ) {
         commentService.updateComment(
                 postId,
@@ -74,14 +78,20 @@ public class CommentController {
     }
 
     // 댓글 삭제
-    @DeleteMapping({"/{comment_id}"})
+    @DeleteMapping({"/{commentId}"})
     public ResponseEntity<ApiResponse<Void>> deleteComment(
-            @PathVariable("post_id") Long postId,
-            @PathVariable("comment_id") Long commentId
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId,
+            @PathVariable("commentId")
+            @Positive(message = "INVALID_FORMAT")
+            Long commentId,
+            @AuthenticationPrincipal Long userId
     ) {
         commentService.deleteComment(
                 postId,
-                commentId
+                commentId,
+                userId
         );
 
         return ResponseEntity

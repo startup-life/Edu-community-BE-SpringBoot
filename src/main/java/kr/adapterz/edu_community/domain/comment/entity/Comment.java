@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
+
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -32,10 +34,6 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    public Comment(String content) {
-        this.content = content;
-    }
-
     public Comment(String content, User author, Post post) {
         this.content = content;
         this.author = author;
@@ -50,7 +48,7 @@ public class Comment extends BaseEntity {
         this.content = content;
     }
 
-    public void delete() {
-        this.deletedAt = java.time.LocalDateTime.now();
+    public void withdraw() {
+        this.deletedAt = LocalDateTime.now();
     }
 }
