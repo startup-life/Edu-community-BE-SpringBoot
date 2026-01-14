@@ -8,15 +8,15 @@ import lombok.Getter;
 public class AttachFileInfo {
 
     private Long fileId;
-    private String path;
+    private String fileUrl;
 
     public static AttachFileInfo of(
             Long fileId,
-            String path
+            String fileUrl
     ) {
         return new AttachFileInfo(
                 fileId,
-                path
+                fileUrl
         );
     }
 }

@@ -12,6 +12,7 @@ import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
 import kr.adapterz.edu_community.global.exception.NotFoundException;
+import kr.adapterz.edu_community.global.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +36,26 @@ public class PostService {
     private final PostQueryRepository postQueryRepository;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
+
+    // 게시글 작성
+    public Long createPost(Long authorId, CreatePostRequest createPostRequest) {
+        User author = userRepository.findActiveById(authorId)
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+
+        File attachFile = resolveAttachFile(createPostRequest.getAttachFileUrl());
+        System.out.println("================= attachFile: " + attachFile);
+        Post post = Post.create(
+                createPostRequest.getTitle(),
+                createPostRequest.getContent(),
+                author,
+                attachFile
+        );
+
+        postRepository.save(post);
+
+        // 무거운 변환 로직 제거하고 ID만 반환
+        return post.getId();
+    }
 
     // 개사굴 목록 조회
     @Transactional(readOnly = true)
@@ -61,7 +82,7 @@ public class PostService {
     public PostResponse getPost(Long postId) {
         // 게시글 조회
         Post post = postQueryRepository.findByIdWithAuthor(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
 
         // 작성자 조회
         User user = post.getAuthor();
@@ -89,24 +110,6 @@ public class PostService {
                 attachFile != null ? AttachFileInfo.of(attachFile.getId(), attachFile.getFilePath()) : null,
                 post.getCreatedAt()
         );
-    }
-
-    // 게시글 작성
-    public Long createPost(Long authorId, CreatePostRequest createPostRequest) {
-
-        User author = userRepository.findActiveById(authorId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
-
-        File attachFile = resolveAttachFile(createPostRequest.getAttachFilePath());
-
-        Post post = Post.create(
-                createPostRequest.getTitle(),
-                createPostRequest.getContent(),
-                author,
-                attachFile
-        );
-
-        return postRepository.save(post).getId();
     }
 
     // 게시글 수정
@@ -190,11 +193,15 @@ public class PostService {
     }
 
     private File resolveAttachFile(String attachFilePath) {
-        if (attachFilePath == null || attachFilePath.isBlank()) {
+        // FileUtil 적용: URL이 들어와도 Path만 추출
+        String path = FileUtil.extractPathFromUrl(attachFilePath);
+
+        if (path == null || path.isBlank()) {
             return null;
         }
-        return fileRepository.findByFilePath(attachFilePath)
-                .orElseThrow(() -> new NotFoundException("PROFILE_IMAGE_NOT_FONUD"));
+
+        return fileRepository.findByFilePath(path)
+                .orElseThrow(() -> new NotFoundException("ATTACH_FILE_NOT_FOUND")); // 오타 수정 및 명칭 변경
     }
 
 }
