@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import kr.adapterz.edu_community.domain.post.dto.request.CreatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.request.UpdatePostRequest;
 import kr.adapterz.edu_community.domain.post.dto.response.PostIdResponse;
+import kr.adapterz.edu_community.domain.post.dto.response.PostLikeResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostResponse;
 import kr.adapterz.edu_community.domain.post.dto.response.PostsResponse;
 import kr.adapterz.edu_community.domain.post.service.PostService;
@@ -85,9 +86,12 @@ public class PostController {
     // 게시글 삭제
     @DeleteMapping("/{postId}")
     public ResponseEntity<ApiResponse<Void>> deletePost(
-        @PathVariable("postId")  Long postId
+        @PathVariable("postId")
+        @AuthenticationPrincipal Long userId,
+        @Positive(message = "INVALID_FORMAT")
+        Long postId
     ) {
-        postService.deletePost(postId);
+        postService.deletePost(postId, userId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -97,12 +101,44 @@ public class PostController {
     // 게시글 조회수 증가
     @PostMapping("/{postId}/views")
     public ResponseEntity<ApiResponse<Void>> increasePostViews(
-            @PathVariable("postId") Long postId
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId
     ) {
         postService.increasePostViews(postId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.of("POST_VIEW_INCREASED", null));
+    }
+
+    // 게시글 좋아요 증가
+    @PostMapping("/{postId}/likes")
+    public ResponseEntity<ApiResponse<PostLikeResponse>> increasePostLikes(
+            @PathVariable("postId")
+            @Positive(message = "INVALID_FORMAT")
+            Long postId,
+            @AuthenticationPrincipal Long userId
+    ) {
+        PostLikeResponse updatedLikeCount = postService.increasePostLikes(postId, userId);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.of("POST_LIKE_CREATED", updatedLikeCount));
+    }
+
+    // 게시글 좋아요 감소
+    @DeleteMapping("/{postId}/likes")
+    public ResponseEntity<ApiResponse<PostLikeResponse>> decreasePostLikes(
+        @PathVariable("postId")
+        @Positive(message = "INVALID_FORMAT")
+        Long postId,
+        @AuthenticationPrincipal Long userId
+    ) {
+        PostLikeResponse updatedLikeCount = postService.decreasePostLikes(postId, userId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.of("POST_LIKE_DELETED", updatedLikeCount));
     }
 }

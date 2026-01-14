@@ -73,7 +73,7 @@ public class Post extends BaseEntity {
         this.attachFile = attachFile;
     }
 
-    public void delete() {
+    public void withdraw() {
         this.deletedAt = LocalDateTime.now();
     }
 
@@ -89,5 +89,15 @@ public class Post extends BaseEntity {
 
     public void increaseHits() {
         this.hits += 1;
+    }
+
+    public void increaseLikes() {
+        this.likeCount += 1;
+    }
+
+    public void decreaseLikes() {
+        if (this.likeCount > 0) {
+            this.likeCount -= 1;
+        }
     }
 }
