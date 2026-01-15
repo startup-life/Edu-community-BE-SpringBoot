@@ -29,26 +29,6 @@ public class CommentQueryRepositoryImpl implements CommentQueryRepository {
     }
 
     @Override
-    public Optional<Comment> findByIdAndPostIdAndAuthorId(
-            Long commentId,
-            Long postId,
-            Long authorId
-    ) {
-        return entityManager.createQuery("""
-            select c
-            from Comment c
-            where c.id = :commentId
-            and c.post.id = :postId
-            and c.author.id = :authorId
-        """, Comment.class)
-                .setParameter("commentId", commentId)
-                .setParameter("postId", postId)
-                .setParameter("authorId", authorId)
-                .getResultStream()
-                .findFirst();
-    }
-
-    @Override
     public Optional<Comment> findByIdAndPostId(Long commentId, Long postId) {
         return entityManager.createQuery("""
             select c

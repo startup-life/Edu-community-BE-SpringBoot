@@ -6,12 +6,12 @@ import kr.adapterz.edu_community.domain.comment.entity.Comment;
 import kr.adapterz.edu_community.domain.comment.repository.CommentQueryRepository;
 import kr.adapterz.edu_community.domain.comment.repository.CommentRepository;
 import kr.adapterz.edu_community.domain.file.entity.File;
-import kr.adapterz.edu_community.domain.file.repository.FileRepository;
 import kr.adapterz.edu_community.domain.post.dto.response.AuthorInfo;
 import kr.adapterz.edu_community.domain.post.entity.Post;
 import kr.adapterz.edu_community.domain.post.repository.PostRepository;
 import kr.adapterz.edu_community.domain.user.entity.User;
 import kr.adapterz.edu_community.domain.user.repository.UserRepository;
+import kr.adapterz.edu_community.global.exception.AccessDeniedException;
 import kr.adapterz.edu_community.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,9 +27,26 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final CommentQueryRepository commentQueryRepository;
-    private final FileRepository fileRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+
+    // 댓글 작성
+    public void createComment(
+            Long postId,
+            Long userId,
+            String content
+    ) {
+        User author = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+
+        Post post = postRepository.findActiveById(postId)
+                .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
+
+        Comment comment = Comment.create(content, author, post);
+
+        commentRepository.save(comment);
+        post.increaseCommentCount();
+    }
 
     // 특정 게시글의 댓글 조회
     @Transactional(readOnly = true)
@@ -45,26 +62,6 @@ public class CommentService {
         );
     }
 
-    // 댓글 작성
-    public Long createComment(
-            Long postId,
-            Long userId,
-            String content
-    ) {
-        User author = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
-
-        Post post = postRepository.findActiveById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
-
-        Comment comment = Comment.create(content, author, post);
-        Comment savedComment = commentRepository.save(comment);
-
-        increaseCommentCount(post);
-
-        return savedComment.getId();
-    }
-
     // 댓글 수정
     public void updateComment(
             Long postId,
@@ -72,9 +69,13 @@ public class CommentService {
             Long userId,
             String content
     ) {
-        Comment comment = commentQueryRepository.findByIdAndPostIdAndAuthorId(
-                        commentId, postId, userId)
-                .orElseThrow(() -> new NotFoundException("comment_not_found"));
+        Comment comment = commentQueryRepository.findByIdAndPostId(
+                        commentId, postId)
+                .orElseThrow(() -> new NotFoundException("COMMENT_NOT_FOUND"));
+
+        if (!comment.getAuthor().getId().equals(userId)) {
+            throw new AccessDeniedException("FORBIDDEN");
+        }
 
         comment.update(content);
     }
@@ -82,18 +83,25 @@ public class CommentService {
     // 댓글 삭제
     public void deleteComment(
             Long postId,
-            Long commentId
+            Long commentId,
+            Long userId
     ) {
-        Post post = postRepository.findActiveById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
-
+        // 댓글 조회
         Comment comment = commentQueryRepository.findByIdAndPostId(
                         commentId, postId)
-                .orElseThrow(() -> new NotFoundException("comment_not_found"));
+                .orElseThrow(() -> new NotFoundException("COMMENT_NOT_FOUND"));
 
-        post.decreaseCommentCount();
+        // 권한 체크
+        if (!comment.getAuthor().getId().equals(userId)) {
+            throw new AccessDeniedException("FORBIDDEN");
+        }
 
-        comment.delete();
+        // 댓글 삭제 및 저장
+        comment.withdraw();
+        commentRepository.saveAndFlush(comment);
+
+        // 게시글 댓글 수 감소 (여기서 컨텍스트가 초기화 됨)
+        postRepository.decreaseCommentCount(postId);
     }
 
     // ========== Private Methods ==========
@@ -117,9 +125,5 @@ public class CommentService {
                 ),
                 comment.getCreatedAt()
         );
-    }
-
-    private void increaseCommentCount(Post post) {
-        post.increaseCommentCount();
     }
 }

@@ -84,7 +84,7 @@ public class PostService {
     }
 
     // 게시글 상세 조회
-    public PostResponse getPost(Long postId) {
+    public PostResponse getPost(Long postId, Long userId) {
         // 게시글 조회
         Post post = postQueryRepository.findByIdWithAuthor(postId)
                 .orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
@@ -100,6 +100,9 @@ public class PostService {
         // 첨부 파일 조회
         File attachFile = post.getAttachFile();
 
+        // 좋아요 여부 조회 (userId가 null이면 false)
+        boolean isLiked = userId != null && postLikeRepository.existsByUserIdAndPostId(userId, postId);
+
         return PostResponse.of(
                 post.getId(),
                 post.getTitle(),
@@ -107,6 +110,7 @@ public class PostService {
                 post.getLikeCount(),
                 post.getCommentCount(),
                 post.getHits(),
+                isLiked,
                 AuthorInfo.of(
                         user.getId(),
                         user.getNickname(),
